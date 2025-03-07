@@ -39,9 +39,9 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 
     // Define the threshold as roughly 3 months (90 days)
     const QUARTER_MILLISECONDS = 90 * 24 * 60 * 60 * 1000;
-    
+
     // If already in databse and up-to-date, return from our database (BYPASS ALPHA VANTAGE API)
-    if (stockDoc) { // Is symbol already in database? 
+    if (stockDoc) { // Is symbol already in database?
       // Use incomeStatements as an example to check freshness.
       const latestFiscalDate = getLatestDate(stockDoc.incomeStatements);
       if (latestFiscalDate) { // Is there a latest fiscal date?
@@ -78,10 +78,10 @@ app.get('/api/stocks/:symbol', async (req, res) => {
     // Extract QUARTERLY data for database
     const newStock = new Stock({
       symbol,
-      dividends: dividendsRes.data["data"] || [], 
-      incomeStatements: incomeRes.data["quarterlyReports"] || [], 
-      balanceSheets: balanceRes.data["quarterlyReports"] || [], 
-      cashFlows: cashFlowRes.data["quarterlyReports"] || [], 
+      dividends: dividendsRes.data["data"] || [],
+      incomeStatements: incomeRes.data["quarterlyReports"] || [],
+      balanceSheets: balanceRes.data["quarterlyReports"] || [],
+      cashFlows: cashFlowRes.data["quarterlyReports"] || [],
       earnings: earningsRes.data["quarterlyEarnings"] || [],
     });
 
@@ -114,6 +114,28 @@ app.post('/api/signup', async (req, res) => {
     return res.status(403).json({ error: "All fields are required." });
   }
 
+  const emailValidate = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if(!emailValidate.test(email)){
+    return res.status(403).json({ error: "Invalid email."})
+  }
+
+
+  // makes sure the password is more than 8 chars, contains at least one letter
+  // contains at least one number, and a special character
+  if( !( password.length >= 8 || 
+    (/[a-zA-Z]/.test(password) && 
+    (/[0-9]/.test(password) && 
+    (/[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(password))))
+      ) ) {
+        return res.status(403).json({ error: "Password must be 8+ characters long. Also contain at least one letter, number, and special character."});
+  }
+
+  const usernameTaken = await User.findOne({ username }); //checking if username is taken
+  if (usernameTaken) {
+    return res.status(403).json({ error: "Username is taken." });
+  }
+  
+  
   try {
     const existingUser = await User.findOne({ email }); //checking if user already exists
     if (existingUser) {
