@@ -114,13 +114,15 @@ app.post('/api/signup', async (req, res) => {
     return res.status(403).json({ error: "All fields are required." });
   }
 
-
-  
-  
   try {
     const existingUser = await User.findOne({ email }); //checking if user already exists
     if (existingUser) {
       return res.status(403).json({ error: "A user with that email already exists." });
+    }
+    console.log("checking username: ", username);
+    const usernameTaken = await User.findOne({ username }); //checking if username is taken
+    if (usernameTaken) {
+      return res.status(403).json({ error: "Username is taken." });
     }
 
     const emailValidate = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -138,11 +140,7 @@ app.post('/api/signup', async (req, res) => {
         ) ) {
           return res.status(403).json({ error: "Password must be 8+ characters long. Also contain at least one letter, number, and special character."});
     }
-  
-    const usernameTaken = await User.findOne({ username }); //checking if username is taken
-    if (usernameTaken) {
-      return res.status(403).json({ error: "Username is taken." });
-    }
+
 
     const hashedPassword = await bcrypt.hash(password, 10); //hashing the password
 
