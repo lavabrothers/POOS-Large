@@ -75,33 +75,60 @@ app.get('/api/stocks/:symbol', async (req, res) => {
       axios.get(urls.earnings)
     ]);
 
-    // Extract QUARTERLY data for database
-    const newStock = new Stock({
+    // Helper function to check for rate limit message in a response object
+    const hasRateLimitError = (data) => {
+      return data.Information && data.Information.includes("our standard API rate limit is 25 requests per day");
+    };
+
+     // ERROR HANDLING: Check if any response indicates a rate limit error
+     if (
+      hasRateLimitError(dividendsRes.data) ||
+      hasRateLimitError(incomeRes.data) ||
+      hasRateLimitError(balanceRes.data) ||
+      hasRateLimitError(cashFlowRes.data) ||
+      hasRateLimitError(earningsRes.data)
+    ) {
+      console.error("Alpha Vantage rate limit exceeded.");
+      return res.status(429).json({ error: "Alpha Vantage rate limit exceeded. Please try again later." });
+    }
+
+    // Extract quarterly data into an object
+    const extractedData = {
       symbol,
       dividends: dividendsRes.data["data"] || [],
       incomeStatements: incomeRes.data["quarterlyReports"] || [],
       balanceSheets: balanceRes.data["quarterlyReports"] || [],
       cashFlows: cashFlowRes.data["quarterlyReports"] || [],
       earnings: earningsRes.data["quarterlyEarnings"] || [],
-    });
+      updatedAt: new Date()
+    };
 
-    // If you want ALL data (quarterly and annual):
-    // const newStock = new Stock({
-    //   symbol,
-    //   dividends: dividendsRes.data,
-    //   incomeStatement: incomeRes.data,
-    //   balanceSheet: balanceRes.data,
-    //   cashFlow: cashFlowRes.data,
-    //   earnings: earningsRes.data,
-    //   lastUpdated: new Date()
-    // });
-    stockDoc = await newStock.save();
+    // ERROR HANDLING: Check if the extracted data is empty
+    const isDataEmpty = !extractedData.incomeStatements.length &&
+                        !extractedData.balanceSheets.length &&
+                        !extractedData.cashFlows.length &&
+                        !extractedData.earnings.length &&
+                        !extractedData.dividends.length;
 
-    console.log(`Stored data for ${symbol} in database.`);
+    if (isDataEmpty) {
+      console.error(`Alpha Vantage returned no valid data for ${symbol}.`);
+      return res.status(404).json({ error: `No data found for symbol ${symbol}.` });
+    }
+
+    // Now create a new document with the extracted data
+    const newStock = new Stock(extractedData);
+
+    if (stockDoc) {
+      stockDoc = await Stock.findOneAndUpdate({ symbol }, extractedData, { new: true });
+      console.log(`Updated data for ${symbol} in database.`);
+    } else {
+      stockDoc = await newStock.save();
+      console.log(`Stored data for ${symbol} in database.`);
+    }
     res.json(stockDoc);
   } catch (error) {
     console.error("Error fetching stock data:", error);
-    res.status(500).json({ error: "Failed to retrieve stock data" });
+    res.status(500).json({ error: "Failed to retrieve stock data", details: error.message });
   }
 });
 
