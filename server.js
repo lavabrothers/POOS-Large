@@ -148,7 +148,7 @@ app.post('/api/favorites', async (req, res) => {
 });
 
 // remove a single stock from a user's favorite list
-app.put('/favorites/:userId/remove', async (req, res) => {
+app.put('/Favorites/:userId/remove', async (req, res) => {
   const {symbol} = req.body;
   const {userId} = req.params;
   try{
@@ -173,7 +173,7 @@ app.put('/favorites/:userId/remove', async (req, res) => {
   }
 });
 
-app.put('/favorites/:userId/add', async(req, res) => {
+app.put('/Favorites/:userId/add', async(req, res) => {
   const {symbol, stockName} = req.body;
   const {userId} = req.params;
   try{
