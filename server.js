@@ -6,6 +6,7 @@ const axios = require('axios');
 require('dotenv').config();
 const bcrypt = require('bcrypt'); //for hashing passwords
 const User = require('./models/User'); //for user signup api
+const Favorite = require('./models/Favorite');
 
 // Connect to MongoDB
 //console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -131,6 +132,76 @@ app.get('/api/stocks/:symbol', async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve stock data", details: error.message });
   }
 });
+
+// creates the favorites list of a user, this is used for the signup
+app.post('/api/favorites', async (req, res) => {
+  const {userId, stocks} = req.body;
+  try{
+    const newFavorite = new Favorite({ userId, stocks });
+    await newFavorite.save();
+    res.status(201).json({ message: "Favorites list created successfully." });
+  } catch (error) {
+    console.error("Error during favorites creation:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+  
+});
+
+// remove a single stock from a user's favorite list
+app.put('/favorites/:userId/remove', async (req, res) => {
+  const {symbol} = req.body;
+  const {userId} = req.params;
+  try{
+    // find user's favorite list;
+    const favorite = await Favorite.findOne({userId});
+
+    if(!favorite){ // does not exist
+      return res.status(404).json({message: 'Favorites not found for this user.'});
+    }
+
+    const oldStocks = [...favorite.stocks]; // old list
+
+    const newStocks = favorite.stocks.filter(stock => stock.symbol !== symbol); // new list without the stock
+
+    favorite.stocks = newStocks; // store new stocks list
+
+    await favorite.save();
+
+    res.json({message: 'Stock ${symbol} removed.'});
+  } catch(err){
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.put('/favorites/:userId/add', async(req, res) => {
+  const {symbol, stockName} = req.body;
+  const {userId} = req.params;
+  try{
+    const favorite = await Favorite.findOne({userId});
+
+    if(!favorite) {
+      return res.status(404).json({message: 'Favorites not found for this user.'})
+    }
+    const oldStocks = [...favorite.stocks];
+
+    // check if stock is already in the list
+    const exists = favorite.stocks.some(
+      stock => stock.symbol === symbol
+    );
+
+    if(exists){
+      return res.status(400).json({message: 'Stock ${symbol} already exists in favorites list.'})
+    }
+
+    favorite.stocks.push({symbol, stockName});
+
+    await favorite.save();
+
+    res.json({ message: 'StStock ${symbol} added.'});
+  } catch(err){
+    res.status(500).json({ error: "Internal server error." })
+  }
+}); 
 
 //route for user signup (takes in username, email, password, first & last name for parameters)
 app.post('/api/signup', async (req, res) => {
