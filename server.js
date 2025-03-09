@@ -120,6 +120,62 @@ app.post('/api/favorites', async (req, res) => {
   
 });
 
+// remove a single stock from a user's favorite list
+app.put('/favorites/:userId/remove', async (req, res) => {
+  const {symbol} = req.body;
+  const {userId} = req.params;
+  try{
+    // find user's favorite list;
+    const favorite = await Favorite.findOne({userId});
+
+    if(!favorite){ // does not exist
+      return res.status(404).json({message: 'Favorites not found for this user.'});
+    }
+
+    const oldStocks = [...favorite.stocks]; // old list
+
+    const newStocks = favorite.stocks.filter(stock => stock.symbol !== symbol); // new list without the stock
+
+    favorite.stocks = newStocks; // store new stocks list
+
+    await favorite.save();
+
+    res.json({message: 'Stock ${symbol} removed.'});
+  } catch(err){
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.put('/favorites/:userId/add', async(req, res) => {
+  const {symbol, stockName} = req.body;
+  const {userId} = req.params;
+  try{
+    const favorite = await Favorite.findOne({userId});
+
+    if(!favorite) {
+      return res.status(404).json({message: 'Favorites not found for this user.'})
+    }
+    const oldStocks = [...favorite.stocks];
+
+    // check if stock is already in the list
+    const exists = favorite.stocks.some(
+      stock => stock.symbol === symbol
+    );
+
+    if(exists){
+      return res.status(400).json({message: 'Stock ${symbol} already exists in favorites list.'})
+    }
+
+    favorite.stocks.push({symbol, stockName});
+
+    await favorite.save();
+
+    res.json({ message: 'StStock ${symbol} added.'});
+  } catch(err){
+    res.status(500).json({ error: "Internal server error." })
+  }
+}); 
+
 //route for user signup (takes in username, email, password, first & last name for parameters)
 app.post('/api/signup', async (req, res) => {
   const { username, email, password, firstName, lastName } = req.body;
