@@ -133,7 +133,7 @@ app.post('/api/signup', async (req, res) => {
   
     // makes sure the password is more than 8 chars, contains at least one letter
     // contains at least one number, and a special character
-    if( !( password.length >= 8 || 
+    if( !( password.length >= 8 && 
       (/[a-zA-Z]/.test(password) && 
       (/[0-9]/.test(password) && 
       (/[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(password))))
