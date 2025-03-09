@@ -6,6 +6,7 @@ const axios = require('axios');
 require('dotenv').config();
 const bcrypt = require('bcrypt'); //for hashing passwords
 const User = require('./models/User'); //for user signup api
+const Favorite = require('./models/Favorite');
 
 // Connect to MongoDB
 //console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -103,6 +104,20 @@ app.get('/api/stocks/:symbol', async (req, res) => {
     console.error("Error fetching stock data:", error);
     res.status(500).json({ error: "Failed to retrieve stock data" });
   }
+});
+
+// creates the favorites list of a user, this is used for the signup
+app.post('/api/favorites', async (req, res) => {
+  const {userId, stocks} = req.body;
+  try{
+    const newFavorite = new Favorite({ userId, stocks });
+    await newFavorite.save();
+    res.status(201).json({ message: "Favorites list created successfully." });
+  } catch (error) {
+    console.error("Error during favorites creation:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+  
 });
 
 //route for user signup (takes in username, email, password, first & last name for parameters)
