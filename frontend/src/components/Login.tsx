@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 function Login()
 {
@@ -19,8 +20,8 @@ const [loginPassword,setPassword] = React.useState('');
 
   function goToSignup() : void 
   {
-    setMessage('TODO once signup is ready');
-    return;
+   
+    window.location.href = '/signup';
   }
 
   async function doLogin(event:any) : Promise<void>
