@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 
 import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
 import OnboardingPage from './pages/OnboardingPage';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/onboard" element={<OnboardingPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
@@ -21,3 +23,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
