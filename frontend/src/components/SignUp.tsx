@@ -86,16 +86,17 @@ async function doSignUp(event:any) : Promise<void>
 return(
   <div id="signupDiv">
     <span id="inner-title">PLEASE SIGN UP </span><br />
+
+    <input type="text" id="loginName" placeholder="Username" 
+      onChange={handleSetLoginName} /><br />
+    <input type="text" id="loginEmail" placeholder="Email" 
+      onChange={handleSetEmail} /><br />
+    <input type="password" id="loginPassword" placeholder="Password" 
+      onChange={handleSetPassword} /><br/><br/>
     <input type="text" id="firstName" placeholder="First Name" 
       onChange={handleSetFirstName} /><br />
     <input type="text" id="lastName" placeholder="Last Name" 
       onChange={handleSetLastName} /><br />
-    <input type="text" id="loginEmail" placeholder="Email" 
-      onChange={handleSetEmail} /><br />
-    <input type="text" id="loginName" placeholder="Username" 
-      onChange={handleSetLoginName} /><br />
-    <input type="password" id="loginPassword" placeholder="Password" 
-      onChange={handleSetPassword} /><br/><br/>
     <button type="button" id="signupButton" className="buttons"
       onClick={doSignUp}>Sign Up </button><br/><br/>
     <span id="signupResult">{message}</span>
