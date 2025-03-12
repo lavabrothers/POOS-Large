@@ -158,6 +158,10 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
   try{
+    const found = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
+    if(found){
+      return res.status(404).json({message: 'Favorites list already exists for this user.'})
+    }
     const newFavorite = new Favorite({ userId, stocks });
     await newFavorite.save();
     res.status(201).json({ message: "Favorites list created successfully." });
@@ -174,7 +178,7 @@ app.put('/api/favorites/remove', async (req, res) => {
 
   try{
     // find user's favorite list;
-    const favorite = await Favorite.findOne({userId});
+    const favorite = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
 
     if(!favorite){ // does not exist
       return res.status(404).json({message: 'Favorites not found for this user.'});
@@ -188,17 +192,17 @@ app.put('/api/favorites/remove', async (req, res) => {
 
     await favorite.save();
 
-    res.json({message: 'Stock ${symbol} removed.'});
+    res.json({message: `Stock ${symbol} removed.`});
   } catch(err){
     res.status(500).json({ error: "Internal server error." });
   }
 });
 
 app.put('/api/favorites/add', async(req, res) => {
-  const { userId, symbol } = req.body;
-  
+  const { userId, symbol, stockName } = req.body;
+
   try{
-    const favorite = await Favorite.findOne({userId});
+    const favorite = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
 
     if(!favorite) {
       return res.status(404).json({message: 'Favorites not found for this user.'})
@@ -211,14 +215,14 @@ app.put('/api/favorites/add', async(req, res) => {
     );
 
     if(exists){
-      return res.status(400).json({message: 'Stock ${symbol} already exists in favorites list.'})
+      return res.status(400).json({message: `Stock ${symbol} already exists in favorites list.`})
     }
 
     favorite.stocks.push({symbol, stockName});
 
     await favorite.save();
 
-    res.json({ message: 'StStock ${symbol} added.'});
+    res.json({ message: `Stock ${symbol} added.`});
   } catch(err){
     res.status(500).json({ error: "Internal server error." })
   }

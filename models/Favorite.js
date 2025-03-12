@@ -15,6 +15,6 @@ const favoriteSchema = new mongoose.Schema({
     stocks: [stocksSchema]
 })
 
-const Favorite = mongoose.model('Favorites', favoriteSchema);
+const Favorite = mongoose.model('favorites', favoriteSchema);
 
 module.exports = Favorite;
