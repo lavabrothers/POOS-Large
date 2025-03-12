@@ -20,7 +20,7 @@ function handleSetLastName( e: any ) : void
 
 function handleSetEmail( e: any ) : void
 {
-  setLastName( e.target.value );
+  setEmail( e.target.value );
 }
 function handleSetLoginName( e: any ) : void
 {
@@ -71,7 +71,9 @@ async function doSignUp(event:any) : Promise<void>
       localStorage.setItem('user_data', JSON.stringify(user));
 
       setMessage('Login successful!');
-      //window.location.href = '/cards';
+
+      goToOnBoard();
+      
     }
   }
   catch(error:any)
@@ -96,8 +98,6 @@ return(
       onChange={handleSetPassword} /><br/><br/>
     <button type="button" id="signupButton" className="buttons"
       onClick={doSignUp}>Sign Up </button><br/><br/>
-    <button type="button" id="signupButton" className="buttons"
-      onClick={goToOnBoard}>Sign Up</button><br />
     <span id="signupResult">{message}</span>
   </div>
 );
