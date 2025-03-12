@@ -202,7 +202,7 @@ app.put('/api/favorites/add', async(req, res) => {
   const { userId, symbol, stockName } = req.body;
 
   try{
-    const favorite = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
+    const favorite = await Favorite.findOne({ userId });
 
     if(!favorite) {
       return res.status(404).json({message: 'Favorites not found for this user.'})
