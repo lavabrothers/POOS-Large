@@ -1,6 +1,7 @@
 // models/User.js
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+mongoose.models = {};
 
 const stocksSchema = new mongoose.Schema({
     symbol: String,
