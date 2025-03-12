@@ -224,6 +224,7 @@ app.put('/api/favorites/add', async(req, res) => {
 
     res.json({ message: `Stock ${symbol} added.`});
   } catch(err){
+    console.error('Error adding stock to favorites:', err); 
     res.status(500).json({ error: "Internal server error." })
   }
 }); 
