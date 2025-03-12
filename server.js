@@ -20,6 +20,27 @@ mongoose.connect(process.env.MONGO_URI, {
 const Stock = require('./models/Stock');
 
 const app = express();
+
+// Change from Connor to fix cors blockage
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PATCH, DELETE, OPTIONS'
+  );
+  next();
+});
+
 app.use(express.json()); //for parsing json
 const PORT = process.env.PORT || 3000;
 
@@ -39,7 +60,7 @@ app.get('/api/stocks/:symbol', async (req, res) => {
     };
 
     // Define the threshold as roughly 3 months (90 days)
-    const QUARTER_MILLISECONDS = 90 * 24 * 60 * 60 * 1000;
+    const QUARTER_MILLISECONDS = 100 * 24 * 60 * 60 * 1000;
 
     // If already in databse and up-to-date, return from our database (BYPASS ALPHA VANTAGE API)
     if (stockDoc) { // Is symbol already in database?
