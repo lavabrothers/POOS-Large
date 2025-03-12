@@ -134,7 +134,7 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 });
 
 // creates the favorites list of a user, this is used for the signup
-app.post('/api/favorites', async (req, res) => {
+app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
   try{
     const newFavorite = new Favorite({ userId, stocks });
@@ -148,9 +148,9 @@ app.post('/api/favorites', async (req, res) => {
 });
 
 // remove a single stock from a user's favorite list
-app.put('/Favorites/:userId/remove', async (req, res) => {
-  const {symbol} = req.body;
-  const {userId} = req.params;
+app.put('/api/favorites/remove', async (req, res) => {
+  const { userId, symbol } = req.body;
+
   try{
     // find user's favorite list;
     const favorite = await Favorite.findOne({userId});
@@ -173,9 +173,9 @@ app.put('/Favorites/:userId/remove', async (req, res) => {
   }
 });
 
-app.put('/Favorites/:userId/add', async(req, res) => {
-  const {symbol, stockName} = req.body;
-  const {userId} = req.params;
+app.put('/api/favorites/add', async(req, res) => {
+  const { userId, symbol } = req.body;
+  
   try{
     const favorite = await Favorite.findOne({userId});
 
