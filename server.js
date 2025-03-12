@@ -184,6 +184,11 @@ app.put('/api/favorites/remove', async (req, res) => {
       return res.status(404).json({message: 'Favorites not found for this user.'});
     }
 
+    const symbolExist = await Favorite.findOne({ symbol });
+    if(!favorite){ // does not exist
+      return res.status(404).json({message: 'This stock is not in this favorites list.'});
+    }
+
     const oldStocks = [...favorite.stocks]; // old list
 
     const newStocks = favorite.stocks.filter(stock => stock.symbol !== symbol); // new list without the stock
