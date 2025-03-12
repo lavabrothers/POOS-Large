@@ -277,8 +277,9 @@ app.post('/api/signup', async (req, res) => {
     });
 
     await newUser.save(); //saving user to db
-
-    res.status(201).json({ message: "User created successfully." });
+    const user = await User.findOne({ username })
+    const userData = user.toObject()
+    res.status(201).json({ message: "User created successfully.", user: userData});
   } catch (error) {
     console.error("Error during user signup:", error);
     res.status(500).json({ error: "Internal server error." });
