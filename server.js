@@ -158,6 +158,10 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
   try{
+    const found = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
+    if(found){
+      return res.status(404).json({message: 'Favorites list already exists for this user.'})
+    }
     const newFavorite = new Favorite({ userId, stocks });
     await newFavorite.save();
     res.status(201).json({ message: "Favorites list created successfully." });
