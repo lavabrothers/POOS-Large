@@ -195,8 +195,8 @@ app.put('/api/favorites/remove', async (req, res) => {
 });
 
 app.put('/api/favorites/add', async(req, res) => {
-  const { userId, symbol } = req.body;
-  
+  const { userId, symbol, stockName } = req.body;
+
   try{
     const favorite = await Favorite.findOne({userId});
 
