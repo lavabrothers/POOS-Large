@@ -158,12 +158,11 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
   try{
-    const found = await Favorite.findOne({ userId: new ObjectId(userId) });
+    const found = await Favorite.findOne({ userId });
     if(found){
-      console.log(found)
       return res.status(404).json({message: 'Favorites list already exists for this user.'})
     }
-    const newFavorite = new Favorite({ userId: new ObjectId(userId), stocks });
+    const newFavorite = new Favorite({ userId, stocks });
     await newFavorite.save();
     res.status(201).json({ message: "Favorites list created successfully." });
   } catch (error) {
@@ -179,7 +178,7 @@ app.put('/api/favorites/remove', async (req, res) => {
 
   try{
     // find user's favorite list;
-    const favorite = await Favorite.findOne({ userId: new mongoose.Schema.Types.ObjectId(userId) });
+    const favorite = await Favorite.findOne({ userId });
 
     if(!favorite){ // does not exist
       return res.status(404).json({message: 'Favorites not found for this user.'});
