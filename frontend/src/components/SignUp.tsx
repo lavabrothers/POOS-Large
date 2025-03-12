@@ -28,8 +28,8 @@ function Signup() {
     setLastName(e.target.value);
   };
 
-  const goToLogin = (): void => {
-    window.location.href = '/login';
+  const goToOnBoard = (): void => {
+    window.location.href = '/onboard';
   };
 
   async function doSignup(event: React.FormEvent<HTMLFormElement>): Promise<void> {
@@ -56,6 +56,7 @@ function Signup() {
         setMessage(res.error);
       } else {
         setMessage('Signup successful!');
+        goToOnBoard();
       }
     } catch (error: any) {
       alert(error.toString());
@@ -109,10 +110,7 @@ function Signup() {
         <br />
         <br />
       </form>
-      <button type="button" id="loginButton" className="buttons" onClick={goToLogin}>
-        Go to Login
-      </button>
-      <br />
+
       <span id="signupResult">{message}</span>
     </div>
   );
