@@ -160,6 +160,7 @@ app.post('/api/favorites/create', async (req, res) => {
   try{
     const found = await Favorite.findOne({ userId: new ObjectId(userId) });
     if(found){
+      console.log(found)
       return res.status(404).json({message: 'Favorites list already exists for this user.'})
     }
     const newFavorite = new Favorite({ userId, stocks });
