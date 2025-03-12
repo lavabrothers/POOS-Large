@@ -158,7 +158,7 @@ app.get('/api/stocks/:symbol', async (req, res) => {
 app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
   try{
-    const found = await Favorite.findOne({ userId });
+    const found = await Favorite.findOne({ userId: new ObjectId(userId) });
     if(found){
       return res.status(404).json({message: 'Favorites list already exists for this user.'})
     }
