@@ -42,8 +42,8 @@ async function doSignUp(event:any) : Promise<void>
 {
   event.preventDefault();
 
-  var obj = {firstname: firstName, lastname: lastName , email: loginEmail, username: loginName, password: loginPassword,};
-  // obj { Ruben, Dennis, rubendennis@gmail.com, username1, password1}
+  var obj = {username: loginName, email: loginEmail, password: loginPassword, firstname: firstName, lastname: lastName};
+ 
 
   var js = JSON.stringify(obj);
 
