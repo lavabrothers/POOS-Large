@@ -1,107 +1,121 @@
 import React, { useState } from 'react';
 
-function SignUp() 
-{
-const [message, setMessage] = useState('');
-const [firstName, setFirstName] = React.useState('');
-const [lastName, setLastName] = React.useState('');
-const [loginEmail, setEmail] = React.useState('');
-const [loginName, setLoginName] = React.useState('');
-const [loginPassword, setPassword] = React.useState('');
+function Signup() {
+  const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
-function handleSetFirstName( e: any ) : void
-{
-  setFirstName( e.target.value );
-}
-function handleSetLastName( e: any ) : void
-{
-  setLastName( e.target.value );
-}
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setUsername(e.target.value);
+  };
 
-function handleSetEmail( e: any ) : void
-{
-  setEmail( e.target.value );
-}
-function handleSetLoginName( e: any ) : void
-{
-  setLoginName( e.target.value );
-}
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setEmail(e.target.value);
+  };
 
-function handleSetPassword( e: any ) : void
-{
-  setPassword( e.target.value );
-}
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setPassword(e.target.value);
+  };
 
-function goToOnBoard() : void 
-{
- 
-  window.location.href = '/onboard';
-}
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setFirstName(e.target.value);
+  };
 
-async function doSignUp(event:any) : Promise<void>
-{
-  event.preventDefault();
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setLastName(e.target.value);
+  };
 
-  var obj = {username: loginName, email: loginEmail, password: loginPassword, firstname: firstName, lastname: lastName};
- 
+  const goToLogin = (): void => {
+    window.location.href = '/login';
+  };
 
-  var js = JSON.stringify(obj);
+  async function doSignup(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
 
-  try
-  {    
+    const obj = {
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+    };
 
-    const response = await fetch('http://134.122.3.46:3000/api/signup', {
-        method:'POST',
-        body: js,
-        headers:{'Content-Type': 'application/json'}});
-        
-    var res = JSON.parse(await response.text());
+    try {
+      const response = await fetch('http://134.122.3.46:3000/api/signup', {
+        method: 'POST',
+        body: JSON.stringify(obj),
+        headers: { 'Content-Type': 'application/json' },
+      });
 
+      const res = await response.json();
 
-    if ("Invalid username or password." == res.error)
-    {
-      setMessage('User/Password combination incorrect');
-    }
-    else if ("Username and password are required." == res.error) {
-      setMessage('Username and password are required.')
-    }
-    else
-    {
-      var user = res.user
-      localStorage.setItem('user_data', JSON.stringify(user));
-
-      setMessage('Login successful!');
-
-      goToOnBoard();
-      
+      if (res.error) {
+        setMessage(res.error);
+      } else {
+        setMessage('Signup successful!');
+      }
+    } catch (error: any) {
+      alert(error.toString());
     }
   }
-  catch(error:any)
-  {
-      alert(error.toString());
-      return;
-  }    
-};
 
-return(
-  <div id="signupDiv">
-    <span id="inner-title">PLEASE SIGN UP </span><br />
+  return (
+    <div id="signupDiv">
+      <span id="inner-title">SIGN UP</span>
+      <br />
+      <form onSubmit={doSignup}>
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          onChange={handleUsernameChange}
+        />
+        <br />
+        <input
+          type="email"
+          id="email"
+          placeholder="Email"
+          onChange={handleEmailChange}
+        />
+        <br />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          onChange={handlePasswordChange}
+        />
+        <br />
+        <input
+          type="text"
+          id="firstName"
+          placeholder="First Name"
+          onChange={handleFirstNameChange}
+        />
+        <br />
+        <input
+          type="text"
+          id="lastName"
+          placeholder="Last Name"
+          onChange={handleLastNameChange}
+        />
+        <br />
+        <br />
+        <button type="submit" id="signupButton" className="buttons">
+          Sign Up
+        </button>
+        <br />
+        <br />
+      </form>
+      <button type="button" id="loginButton" className="buttons" onClick={goToLogin}>
+        Go to Login
+      </button>
+      <br />
+      <span id="signupResult">{message}</span>
+    </div>
+  );
+}
 
-    <input type="text" id="loginName" placeholder="Username" 
-      onChange={handleSetLoginName} /><br />
-    <input type="text" id="loginEmail" placeholder="Email" 
-      onChange={handleSetEmail} /><br />
-    <input type="password" id="loginPassword" placeholder="Password" 
-      onChange={handleSetPassword} /><br/><br/>
-    <input type="text" id="firstName" placeholder="First Name" 
-      onChange={handleSetFirstName} /><br />
-    <input type="text" id="lastName" placeholder="Last Name" 
-      onChange={handleSetLastName} /><br />
-    <button type="button" id="signupButton" className="buttons"
-      onClick={doSignUp}>Sign Up </button><br/><br/>
-    <span id="signupResult">{message}</span>
-  </div>
-);
-};
-
-export default SignUp;
+export default Signup;
