@@ -56,7 +56,9 @@ const [loginPassword,setPassword] = React.useState('');
         localStorage.setItem('user_data', JSON.stringify(user));
 
         setMessage('Login successful!');
-        //window.location.href = '/cards';
+
+        //When home is ready, put path here
+        //window.location.href = 'PATH TO HOME HERE';
       }
     }
     catch(error:any)

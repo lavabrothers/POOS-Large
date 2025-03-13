@@ -56,6 +56,7 @@ function Signup() {
         setMessage(res.error);
       } else {
         setMessage('Signup successful!');
+        localStorage.setItem('user_data', JSON.stringify(res.user))
         goToOnBoard();
       }
     } catch (error: any) {

@@ -13,6 +13,7 @@ function Onboarding () {
     const [message, setMessage] = useState('')
 
     // using a hardcoded user for now, until signup is up and running 
+    /*
     const userstring = JSON.stringify({
 		"_id": "67cf2a78b0ab1e81c34af699",
 		"username": "onboardtestuser",
@@ -22,9 +23,9 @@ function Onboarding () {
 		"createdAt": "2025-03-10T18:07:52.691Z",
 		"updatedAt": "2025-03-10T18:07:52.691Z",
 		"__v": 0
-	})
+	})*/
     
-    //const userstring = localStorage.getItem('user_data');
+    const userstring = localStorage.getItem('user_data');
     var user : any
     if (userstring != "" && userstring != null) {
         user = JSON.parse(userstring);
@@ -49,8 +50,6 @@ function Onboarding () {
 
         setLogo(symbol)
         console.log('logos/' + logo + '.jpg')
-        
-        
     }
 
     async function addFavorite( event : any ) : Promise<void> {
@@ -59,9 +58,11 @@ function Onboarding () {
         console.log(input)
 
         var symbol = ''
+        var name = ''
         for (var i = 0; i < stocks.length; i++) {
             if (input == stocks[i].symbol + ' (' + stocks[i].name + ')') {
                 symbol = stocks[i].symbol
+                name = stocks[i].name
                 break
             }
         }
@@ -70,11 +71,21 @@ function Onboarding () {
             setMessage('Select an option from the menu to add.')
         }
         else {
-            if ( await alterFav('a', user._id, symbol) ) setMessage('Added ' + symbol + ' to your favorites!')
+            if ( await alterFav('a', user._id, symbol) ) setMessage('Added ' + name + ' to your favorites. Feel free to add more!')
             else setMessage('Failed to add.')
+            setInput('')
         }
-            
     }
+
+    function goToHome() : void {
+        //When home is ready, path to it here
+        //window.location.href = 'PATH TO HOME HERE'
+    }
+
+    function clearInput() : void {
+        setInput('')
+    }
+
     return (
         <div id="onboardingDiv">
             <span id="inner-title">WELCOME TO FINANCIAL STATS, {name.toUpperCase()}!</span><br/>
@@ -84,9 +95,11 @@ function Onboarding () {
             <datalist id="stocks">
                 { stocks.map( d => <option value = {d.symbol + ' (' + d.name + ')'} /> ) }
             </datalist>
-            <input type="submit" value = 'Add' onClick={addFavorite}/><br/><br/>
+            <input type="submit" value = 'Add' onClick={addFavorite}/>
+            <input type="button" value = 'Clear' onClick={clearInput}></input><br/><br/>
             <img src={'logos/' + logo + '.jpg'} alt="Desc" width="64" height="64"></img><br/>
-            <span id='message'>{message}</span>
+            <span id='message'>{message}</span><br/><br/>
+            <button type="button" onClick={goToHome}>Proceed</button>
         </div>
     )
 }
