@@ -16,6 +16,7 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/onboard" element={<OnboardingPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
@@ -23,6 +24,7 @@ function App() {
 }
 
 export default App;
+
 
 
 
