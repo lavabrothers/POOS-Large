@@ -5,6 +5,7 @@ import './App.css';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import OnboardingPage from './pages/OnboardingPage';
+import HomePage from './pages/HomePage';
 
 function App() {
 
