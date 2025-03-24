@@ -79,7 +79,7 @@ function Onboarding () {
 
     function goToHome() : void {
         //When home is ready, path to it here
-        //window.location.href = 'PATH TO HOME HERE'
+        window.location.href = '/home';
     }
 
     function clearInput() : void {

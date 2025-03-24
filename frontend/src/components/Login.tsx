@@ -58,7 +58,7 @@ const [loginPassword,setPassword] = React.useState('');
         setMessage('Login successful!');
 
         //When home is ready, put path here
-        //window.location.href = 'PATH TO HOME HERE';
+        window.location.href = '/home';
       }
     }
     catch(error:any)
