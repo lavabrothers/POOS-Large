@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,8 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
         setState(() => _message = 'Login successful!');
 
-        // TODO: Navigate to home when it's ready
-        // Navigator.pushReplacementNamed(context, '/home');
+        // Navigate to HomePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       }
     } catch (e) {
       setState(() => _message = 'Error: $e');
