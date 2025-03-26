@@ -8,110 +8,103 @@ function Signup() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  function handleUsernameChange (e: any ) : void 
+  {
     setUsername(e.target.value);
-  };
+  }
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  function handleEmailChange (e: any ) : void
+  {
     setEmail(e.target.value);
-  };
+  }
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  function handlePasswordChange (e: any ) : void
+  {
     setPassword(e.target.value);
-  };
+  }
 
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  function handleFirstNameChange (e: any ) : void
+  {
     setFirstName(e.target.value);
-  };
+  }
 
-  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  function handleLastNameChange (e: any ) : void
+  {
     setLastName(e.target.value);
-  };
+  }
 
-  const goToOnBoard = (): void => {
+  function goToOnBoard () : void
+  {
+
     window.location.href = '/onboard';
   };
 
-  async function doSignup(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+  async function doSignup(event: any) : Promise<void>
+  {
     event.preventDefault();
 
-    const obj = {
-      username,
-      email,
-      password,
-      firstName,
-      lastName,
+    var obj = {
+      username: username,
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
     };
 
+    var js = JSON.stringify(obj);
+
     try {
+
       const response = await fetch('http://134.122.3.46:3000/api/signup', {
         method: 'POST',
-        body: JSON.stringify(obj),
-        headers: { 'Content-Type': 'application/json' },
-      });
+        body: js,
+        headers: { 'Content-Type': 'application/json' }});
 
-      const res = await response.json();
+      var res = JSON.parse(await response.text());
 
-      if (res.error) {
+      if (res.error) 
+      {
         setMessage(res.error);
-      } else {
+      } 
+      else 
+      {
+        var user = res.user
+        localStorage.setItem('user_data', JSON.stringify(user));
+
         setMessage('Signup successful!');
-        localStorage.setItem('user_data', JSON.stringify(res.user))
+
         goToOnBoard();
+
       }
-    } catch (error: any) {
-      alert(error.toString());
-    }
-  }
+    } 
+    catch(error:any)
+    {
+        alert(error.toString());
+        return;
+    }    
+  };
 
   return (
     <div id="signupDiv">
-      <span id="inner-title">SIGN UP</span>
-      <br />
-      <form onSubmit={doSignup}>
-        <input
-          type="text"
-          id="username"
-          placeholder="Username"
-          onChange={handleUsernameChange}
-        />
-        <br />
-        <input
-          type="email"
-          id="email"
-          placeholder="Email"
-          onChange={handleEmailChange}
-        />
-        <br />
-        <input
-          type="password"
-          id="password"
-          placeholder="Password"
-          onChange={handlePasswordChange}
-        />
-        <br />
-        <input
-          type="text"
-          id="firstName"
-          placeholder="First Name"
-          onChange={handleFirstNameChange}
-        />
-        <br />
-        <input
-          type="text"
-          id="lastName"
-          placeholder="Last Name"
-          onChange={handleLastNameChange}
-        />
-        <br />
-        <br />
-        <button type="submit" id="signupButton" className="buttons">
-          Sign Up
-        </button>
-        <br />
-        <br />
-      </form>
+      <span id="inner-title">SIGN UP</span><br />
+      <input type="text" id="username" placeholder="Username" 
+        onChange={handleUsernameChange} /><br />
 
+      <input type="email" id="email" placeholder="Email"
+        onChange={handleEmailChange} /><br />
+
+      <input type="password" id="password" placeholder="Password"
+        onChange={handlePasswordChange} /><br />
+
+      <input type="text" id="firstName" placeholder="First Name"
+        onChange={handleFirstNameChange} /><br />
+
+      <input type="text" id="lastName" placeholder="Last Name"
+        onChange={handleLastNameChange} /> <br /><br />
+
+      <button type="button" id="signupButton" className="buttons"
+       onClick={doSignup}> Sign Up</button><br /><br />
+       
       <span id="signupResult">{message}</span>
     </div>
   );
