@@ -7,7 +7,7 @@ const LoginPage = () =>
 {
 
     return(
-      <Box display="flex" flexDirection="column" alignItems="flex-start" justifyContent="center">
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
         <Box display="flex" flexDirection="row" alignItems="flex-start" justifyContent="center" gap={4}>
           <Lottie animationData={graphAnimation} style={{ height: 170}}/>
           <PageTitle />
