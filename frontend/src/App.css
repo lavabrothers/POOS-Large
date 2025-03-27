@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  animation: fade-in 2s;
 }
 
 .logo {
@@ -39,4 +40,17 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.titleHeader{
+  color:brown;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 100;
+  }
 }

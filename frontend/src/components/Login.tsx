@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Box from '@mui/material/Box';
+import { TextField, Typography } from '@mui/material';
 
 function Login()
 {
@@ -69,18 +71,27 @@ const [loginPassword,setPassword] = React.useState('');
   };
 
   return(
-    <div id="loginDiv">
-      <span id="inner-title">PLEASE LOG IN</span><br />
-      <input type="text" id="loginName" placeholder="Username" 
-        onChange={handleSetLoginName} /><br />
-      <input type="password" id="loginPassword" placeholder="Password" 
-        onChange={handleSetPassword} /><br/><br/>
-      <button type="button" id="signupButton" className="buttons"
-        onClick={doLogin}>Log In</button><br/><br/>
-      <button type="button" id="signupButton" className="buttons"
-        onClick={goToSignup}>Sign Up</button><br />
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection:'column', 
+      bgcolor: '#f0f0f0', 
+      borderRadius: '16px', 
+      padding: '24px', 
+      width: '400px', 
+      gap: 2,
+      boxShadow: 3,
+      }}>
+      <Typography variant='h6'> Log in</Typography>
+      <TextField id="loginName" label="Username" variant="outlined" onChange={handleSetLoginName}/>
+      <TextField id="loginPassword" label="Password" variant="outlined" onChange={handleSetPassword}/>
+      <Box sx={{display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center'}}>
+        <button type="button" id="signupButton" className="buttons"
+          onClick={doLogin}>Log In</button><br/><br/>
+        <button type="button" id="signupButton" className="buttons"
+          onClick={goToSignup}>Sign Up</button><br />
+      </Box>
       <span id="loginResult">{message}</span>
-    </div>
+    </Box>
   );
 };
 

@@ -1,7 +1,13 @@
+import * as React from 'react'
+import Typography from '@mui/material/Typography'
+import Box from "@mui/material/Box";
 function PageTitle()
 {
    return(
-     <h1 id="title">Financial Stats</h1>
+    <Box sx={{ width: '100%', maxWidth: 500}}>
+      <Typography variant="h6" >Welcome to</Typography>
+      <Typography variant="h1" >Finstats</Typography>
+    </Box>
    );
 };
 
