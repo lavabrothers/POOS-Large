@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Box from '@mui/material/Box';
+import { TextField, Typography } from '@mui/material';
 
 function Signup() {
   const [message, setMessage] = useState('');
@@ -37,6 +39,12 @@ function Signup() {
   {
 
     window.location.href = '/onboard';
+  };
+
+  function goToLogin () : void
+  {
+
+    window.location.href = '/';
   };
 
   async function doSignup(event: any) : Promise<void>
@@ -84,30 +92,41 @@ function Signup() {
     }    
   };
 
-  return (
-    <div id="signupDiv">
-      <span id="inner-title">SIGN UP</span><br />
-      <input type="text" id="username" placeholder="Username" 
-        onChange={handleUsernameChange} /><br />
+  return(
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection:'column', 
+      bgcolor: '#f0f0f0', 
+      borderRadius: '16px', 
+      padding: '24px', 
+      width: '400px', 
+      gap: 2,
+      boxShadow: 3,
+      }}>
+        
+      <Typography variant='h3' sx={{ color: 'black' }}> Register</Typography>
 
-      <input type="email" id="email" placeholder="Email"
-        onChange={handleEmailChange} /><br />
+      <TextField type="text" id="username" placeholder="Username"  onChange={handleUsernameChange} />
 
-      <input type="password" id="password" placeholder="Password"
-        onChange={handlePasswordChange} /><br />
+      <TextField type="email" id="email" placeholder="Email" onChange={handleEmailChange} />
 
-      <input type="text" id="firstName" placeholder="First Name"
-        onChange={handleFirstNameChange} /><br />
+      <TextField type="password" id="password" placeholder="Password" onChange={handlePasswordChange} />
 
-      <input type="text" id="lastName" placeholder="Last Name"
-        onChange={handleLastNameChange} /> <br /><br />
+      <TextField type="text" id="firstName" placeholder="First Name" onChange={handleFirstNameChange} />
 
-      <button type="button" id="signupButton" className="buttons"
-       onClick={doSignup}> Sign Up</button><br /><br />
-       
+      <TextField type="text" id="lastName" placeholder="Last Name"onChange={handleLastNameChange} /> 
+
+      <Box sx={{display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center'}}>
+
+        <button type="button" id="homeButton" className="buttons"
+          onClick={goToLogin}> Go Back</button><br /><br />
+
+        <button type="button" id="signupButton" className="buttons"
+          onClick={doSignup}> Sign Up</button><br /><br />
+      </Box>
       <span id="signupResult">{message}</span>
-    </div>
+    </Box>
   );
-}
+};
 
 export default Signup;
