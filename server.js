@@ -44,6 +44,15 @@ app.use((req, res, next) => {
 app.use(express.json()); //for parsing json
 const PORT = process.env.PORT || 3000;
 
+app.get('/api/stocks', async (req, res) => {
+  try {
+    const stocks = await Stock.find({});
+    res.json(stocks);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Define the route
 app.get('/api/stocks/:symbol', async (req, res) => {
   try {
