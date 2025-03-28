@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import OnboardingPage from './pages/OnboardingPage';
 import HomePage from './pages/HomePage';
+import FavoritesPage from './pages/FavoritesPage';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/onboard" element={<OnboardingPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
@@ -25,9 +27,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-
