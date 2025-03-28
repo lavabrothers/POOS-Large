@@ -46,12 +46,13 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/api/stocks', async (req, res) => {
   try {
-    const stocks = await Stock.find({});
+    const stocks = await Stock.find({}).select('symbol -_id');
     res.json(stocks);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Define the route
 app.get('/api/stocks/:symbol', async (req, res) => {
