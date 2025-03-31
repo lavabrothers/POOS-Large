@@ -241,7 +241,7 @@ app.put('/api/favorites/add', async(req, res) => {
   }
 }); 
 
-app.get('/api/favorties/search', async(req, res) => {
+app.get('/api/favorites/search', async(req, res) => {
   const { userId, query } = req.query;
 
   try{
@@ -260,7 +260,6 @@ app.get('/api/favorties/search', async(req, res) => {
   } catch(error){
       res.status(500).json({ error: "Internal server error." });
   }
-  
 });
 
 //route for user signup (takes in username, email, password, first & last name for parameters)
