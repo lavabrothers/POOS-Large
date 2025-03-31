@@ -255,7 +255,7 @@ app.get('/api/favorites/search', async(req, res) => {
     let filtered = favList.stocks;
 
     if (query) {
-      filtered = favList.stocks.filter(stock => stock.symbol || stock.stockName);
+      filtered = favList.stocks.filter(stock => stock.symbol.includes(query) || stock.stockName.includes(query));
     }
 
     res.json({stocks: filtered});
