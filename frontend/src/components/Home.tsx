@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-function Home() {
-  const [stocks, setStocks] = useState<any[]>([]);
+function Favorites() {
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Retrieve user data from localStorage
   let name: string = "";
   const userString = localStorage.getItem('user_data');
   let user: any;
@@ -18,42 +17,53 @@ function Home() {
     return <div></div>;
   }
 
-  // Function to navigate to favorites page
-  function goToFavorites(): void {
-    window.location.href = '/favorites';
+  function goToHome(): void {
+    window.location.href = '/home';
   }
 
-  // Fetch the stock symbols from your API endpoint
   useEffect(() => {
-    fetch('http://134.122.3.46:3000/api/stocks') //hard coded 
-      .then((response) => response.json())
-      .then((data) => {
-        setStocks(data);
+    async function fetchFavorites() {
+      try {
+        // Using the favorites search endpoint to get all favorites for this user
+        const response = await fetch(`http://134.122.3.46:3000/api/favorites/search?userId=${user._id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        const data = await response.json();
+        // Expecting data to be an object with a "stocks" array
+        setFavorites(data.stocks);
+      } catch (err: any) {
+        console.error("Error fetching favorites:", err);
+        setError("Error fetching favorites");
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching stocks:", err);
-        setError("Error fetching stocks");
-        setLoading(false);
-      });
-  }, []);
+      }
+    }
+
+    fetchFavorites();
+  }, [user._id]);
+
+  if (loading) return <div>Loading favorites...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
-    <div id="homeDiv">
-      <span id="inner-title">HOME</span>
-      <h2>Welcome, {name}!</h2>
-      <button onClick={goToFavorites}>Favorites</button>
-
-      {loading && <p>Loading stocks...</p>}
-      {error && <p>{error}</p>}
-
+    <div id="favoritesDiv">
+      <span id="inner-title">Favorites</span>
+      <h2>Hello Again, {name}!</h2>
+      <button onClick={goToHome}>Home</button>
       <ul>
-        {stocks.map((stock) => (
-          <li key={stock.symbol}>{stock.symbol}</li>
-        ))}
+        {favorites.length > 0 ? (
+          favorites.map((fav) => (
+            <li key={fav.symbol}>
+              {fav.stockName ? `${fav.stockName} - ` : ""}{fav.symbol}
+            </li>
+          ))
+        ) : (
+          <li>No favorites added.</li>
+        )}
       </ul>
     </div>
   );
 }
 
-export default Home;
+export default Favorites;
