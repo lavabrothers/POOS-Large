@@ -252,6 +252,8 @@ app.get('/api/favorites/search', async(req, res) => {
       return res.status(404).json({message: 'Favorites not found for this user.'});
     }
 
+    let filtered = favList.stocks;
+
     if (query) {
       filtered = favList.stocks.filter(stock => stock.symbol || stock.stockName);
     }
