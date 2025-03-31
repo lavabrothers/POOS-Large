@@ -244,6 +244,28 @@ app.put('/api/favorites/add', async(req, res) => {
   }
 }); 
 
+app.get('/api/favorties/search', async(req, res) => {
+  const { userId, query } = req.query;
+
+  try{
+    // find a user's favorites list first
+    const favList = await Favorite.findOne({ userId });
+
+    if (!favorite) {
+      return res.status(404).json({message: 'Favorites not found for this user.'});
+    }
+
+    if (query) {
+      filtered = favorite.stocks.filter(stock => stock.symbol || stock.stockName);
+    }
+
+    res.json({stocks: filtered});
+  } catch(error){
+      res.status(500).json({ error: "Internal server error." });
+  }
+  
+});
+
 //route for user signup (takes in username, email, password, first & last name for parameters)
 app.post('/api/signup', async (req, res) => {
   const { username, email, password, firstName, lastName } = req.body;
