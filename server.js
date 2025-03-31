@@ -183,29 +183,28 @@ app.post('/api/favorites/create', async (req, res) => {
 app.put('/api/favorites/remove', async (req, res) => {
   const { userId, symbol } = req.body;
 
-  try{
-    // find user's favorite list;
+  try {
+    // Find the user's favorites document
     const favorite = await Favorite.findOne({ userId });
-
-    if(!favorite){ // does not exist
-      return res.status(404).json({message: 'Favorites not found for this user.'});
+    if (!favorite) {
+      return res.status(404).json({ message: 'Favorites not found for this user.' });
     }
 
-    const symbolExist = await Favorite.findOne({ symbol });
-    if(!symbolExist){ // does not exist
-      return res.status(404).json({message: 'This stock is not in this favorites list.'});
+    // Check if the stock exists in the user's favorites list
+    const stockExists = favorite.stocks.some(stock => stock.symbol === symbol);
+    if (!stockExists) {
+      return res.status(404).json({ message: 'This stock is not in this favorites list.' });
     }
 
-    const oldStocks = [...favorite.stocks]; // old list
+    // Filter out the stock from the favorites array
+    favorite.stocks = favorite.stocks.filter(stock => stock.symbol !== symbol);
 
-    const newStocks = favorite.stocks.filter(stock => stock.symbol !== symbol); // new list without the stock
-
-    favorite.stocks = newStocks; // store new stocks list
-
+    // Save the updated document
     await favorite.save();
 
-    res.json({message: `Stock ${symbol} removed.`});
-  } catch(err){
+    res.json({ message: `Stock ${symbol} removed.` });
+  } catch (err) {
+    console.error('Error removing favorite:', err);
     res.status(500).json({ error: "Internal server error." });
   }
 });
