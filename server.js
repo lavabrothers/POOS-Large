@@ -248,12 +248,12 @@ app.get('/api/favorites/search', async(req, res) => {
     // find a user's favorites list first
     const favList = await Favorite.findOne({ userId });
 
-    if (!favorite) {
+    if (!favList) {
       return res.status(404).json({message: 'Favorites not found for this user.'});
     }
 
     if (query) {
-      filtered = favorite.stocks.filter(stock => stock.symbol || stock.stockName);
+      filtered = favList.stocks.filter(stock => stock.symbol || stock.stockName);
     }
 
     res.json({stocks: filtered});
