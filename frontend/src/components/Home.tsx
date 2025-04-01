@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Grid, Typography, Button, Box} from '@mui/material'
+import {Grid, Typography, Button, Box, Slide, Grow} from '@mui/material'
 import StockCard from './StockCard';
 
 function Home() {
@@ -108,24 +108,26 @@ function Home() {
 
   return (
     <Box id="homeDiv" sx={{ padding: 2 }}>
-      <Typography variant="h4">Welcome, {name}!</Typography>
+      <Typography sx={{textDecoration: 'underline'}} variant="h4">Welcome, {name}!</Typography>
       <Button onClick={goToFavorites} variant="contained" sx={{ my: 2 }}>
         Favorites
       </Button>
       {addError && <Typography color="error">{addError}</Typography>}
-      <Grid container spacing={2}>
-        {stocks.length > 0 ? (
-          stocks.map((stock) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
-              <StockCard stock={stock} onAddFavorite={addFavorite} />
+      <Grow in={!loading}>
+        <Grid container spacing={2}>
+          {stocks.length > 0 ? (
+            stocks.map((stock) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
+                <StockCard stock={stock} onAddFavorite={addFavorite} />
+              </Grid>
+            ))
+          ) : (
+            <Grid size={12}>
+              <Typography>No stocks available</Typography>
             </Grid>
-          ))
-        ) : (
-          <Grid size={12}>
-            <Typography>No stocks available</Typography>
-          </Grid>
-        )}
-      </Grid>
+          )}
+        </Grid>
+      </Grow>
     </Box>
   );
 }
