@@ -7,11 +7,9 @@ import SignUpPage from './pages/SignUpPage';
 import OnboardingPage from './pages/OnboardingPage';
 import HomePage from './pages/HomePage';
 import FavoritesPage from './pages/FavoritesPage';
+import StockInfoPage from './pages/StockInfoPage';
 
 function App() {
-
-  
-
   return (
     <Router>
       <Routes>
@@ -20,6 +18,7 @@ function App() {
         <Route path="/onboard" element={<OnboardingPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/stocks/:symbol" element={<StockInfoPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
