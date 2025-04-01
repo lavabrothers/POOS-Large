@@ -1,5 +1,3 @@
-// Testing API
-
 import { useState, useEffect } from 'react';
 
 interface StockData {
@@ -11,16 +9,37 @@ interface StockData {
   earnings: any;
 }
 
+ 
+
 function StockInfo({ stockSymbol }: { stockSymbol: string }) {
+// Retrieve user data from localStorage
+ let name: string = "";
+ const userString = localStorage.getItem('user_data');
+ let user: any;
+
+ if (userString && userString !== "") {
+  user = JSON.parse(userString);
+  name = user.firstName;
+ } else {
+  window.location.href = '/';
+  return <div></div>;
+ }
+
+ function goToHome(): void {
+  window.location.href = '/home';
+}
+
+  
+  const [loading, setLoading] = useState(true);
   const [stockData, setStockData] = useState<StockData | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
 
   useEffect(() => {
     if (!stockSymbol) return;
     setLoading(true);
     setError(null);
-    fetch(`/api/stocks/${stockSymbol}`)
+    fetch(`http://134.122.3.46:3000/api/stocks/${stockSymbol}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
@@ -45,6 +64,7 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   return (
     <div>
       <h2>{stockData.symbol} Stock Data</h2>
+      <button onClick={goToHome}>Home</button>
       {/* Render the data as needed, e.g.: */}
       <p>Latest Annual EPS: {stockData.earnings?.annualEarnings?.[0]?.reportedEPS}</p>
       {/* ...other UI elements to display dividends, financials, etc... */}
