@@ -108,9 +108,8 @@ function Home() {
 
   return (
     <Box id="homeDiv" sx={{ padding: 2 }}>
-      <Typography variant="h4" id="inner-title">HOME</Typography>
-      <Typography variant="h6">Welcome, {name}!</Typography>
-      <Button onClick={goToFavorites} variant="outlined" sx={{ my: 2 }}>
+      <Typography variant="h4">Welcome, {name}!</Typography>
+      <Button onClick={goToFavorites} variant="contained" sx={{ my: 2 }}>
         Favorites
       </Button>
       {addError && <Typography color="error">{addError}</Typography>}
