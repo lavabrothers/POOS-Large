@@ -24,6 +24,10 @@ function Home() {
   function goToFavorites(): void {
     window.location.href = '/favorites';
   }
+  // Function to navigate to the stock's detail page
+  function goToStockPage (symbol: string): void {
+      window.location.href = `/stocks/${symbol}`;
+    };
 
   // Fetch all stocks and the user's favorites, then filter out favorites from the list
   useEffect(() => {
@@ -95,6 +99,8 @@ function Home() {
     }
   };
 
+
+
   if (loading) return <div>Loading stocks...</div>;
   if (error) return <div>{error}</div>;
 
@@ -107,8 +113,12 @@ function Home() {
       <ul>
         {stocks.length > 0 ? (
           stocks.map((stock) => (
-            <li key={stock.symbol}>
-              {stock.symbol} {stock.name && `- ${stock.name}`}
+            <li key={stock.symbol} style={{ marginBottom: '10px' }}>
+              {/* Button to go to the stock detail page */}
+              <button onClick={() => goToStockPage(stock.symbol)}>
+                {stock.symbol} {stock.name && `- ${stock.name}`}
+              </button>
+              {/* "Add to Favorites" button */}
               <button 
                 onClick={() => addFavorite(stock)} 
                 disabled={addingFavorite}
