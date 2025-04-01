@@ -12,10 +12,16 @@ function goToHomePage(): void {
 function Logo()
 {
    return(
-      <Box display="flex" flexDirection="row" alignItems="center" justifyContent="left">
-            <Lottie onClick={goToHomePage} animationData={graphAnimation} style={{ height: 100, cursor:'pointer'}}/>
-            <Typography onClick={goToHomePage} variant="h2" sx={{cursor: 'pointer', mt:3.5}} >Finstats</Typography>
+      <Box>
+            <Box display="flex" flexDirection="row" alignItems="center" justifyContent="left">
+                  <Lottie onClick={goToHomePage} animationData={graphAnimation} style={{ height: 100, cursor:'pointer'}}/>
+                  <Typography onClick={goToHomePage} variant="h2" sx={{cursor: 'pointer', mt:3.5}} >Finstats</Typography>
+            </Box>
+            <Box display="flex" flexDirection="row" alignItems="center" justifyContent="right"> 
+                  {/* We need to add the search bar here.*/}
+            </Box>
       </Box>
+
     );
 };
 
