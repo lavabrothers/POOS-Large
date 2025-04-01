@@ -1,14 +1,16 @@
 import PageTitle from '../components/PageTitle.tsx';
 import Home from '../components/Home.tsx';
+import { Box } from '@mui/material';
+import Logo from '../components/Logo.tsx';
 
 const HomePage = () =>
 {
 
     return(
-      <div>
-        <PageTitle />
+      <Box>
+        <Logo />
         <Home />
-      </div>
+      </Box>
     );
 };
 

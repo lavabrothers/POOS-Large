@@ -83,7 +83,7 @@ const [loginPassword,setPassword] = React.useState('');
       }}>
       <Typography variant='h6'> Log in</Typography>
       <TextField id="loginName" label="Username" variant="outlined" onChange={handleSetLoginName}/>
-      <TextField id="loginPassword" label="Password" variant="outlined" onChange={handleSetPassword}/>
+      <TextField id="loginPassword" type="password" label="Password" variant="outlined" onChange={handleSetPassword}/>
       <Box sx={{display: 'flex', gap: 2, justifyContent: 'center', alignItems: 'center'}}>
         <button type="button" id="signupButton" className="buttons"
           onClick={doLogin}>Log In</button><br/><br/>
