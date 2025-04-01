@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import {Grid, Typography, Button, Box} from '@mui/material'
+import StockCard from './StockCard';
 
 function Home() {
   const [stocks, setStocks] = useState<any[]>([]);
@@ -17,7 +19,7 @@ function Home() {
     name = user.firstName;
   } else {
     window.location.href = '/';
-    return <div></div>;
+    return <Box></Box>
   }
 
   // Navigate to the Favorites page
@@ -101,38 +103,31 @@ function Home() {
 
 
 
-  if (loading) return <div>Loading stocks...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <Box>Loading stocks...</Box>;
+  if (error) return <Box>{error}</Box>;
 
   return (
-    <div id="homeDiv">
-      <span id="inner-title">HOME</span>
-      <h2>Welcome, {name}!</h2>
-      <button onClick={goToFavorites}>Favorites</button>
-      {addError && <p style={{ color: 'red' }}>{addError}</p>}
-      <ul>
+    <Box id="homeDiv" sx={{ padding: 2 }}>
+      <Typography variant="h4" id="inner-title">HOME</Typography>
+      <Typography variant="h6">Welcome, {name}!</Typography>
+      <Button onClick={goToFavorites} variant="outlined" sx={{ my: 2 }}>
+        Favorites
+      </Button>
+      {addError && <Typography color="error">{addError}</Typography>}
+      <Grid container spacing={2}>
         {stocks.length > 0 ? (
           stocks.map((stock) => (
-            <li key={stock.symbol} style={{ marginBottom: '10px' }}>
-              {/* Button to go to the stock detail page */}
-              <button onClick={() => goToStockPage(stock.symbol)}>
-                {stock.symbol} {stock.name && `- ${stock.name}`}
-              </button>
-              {/* "Add to Favorites" button */}
-              <button 
-                onClick={() => addFavorite(stock)} 
-                disabled={addingFavorite}
-                style={{ marginLeft: '10px' }}
-              >
-                {addingFavorite ? "Adding..." : "Add to Favorites"}
-              </button>
-            </li>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
+              <StockCard stock={stock} onAddFavorite={addFavorite} />
+            </Grid>
           ))
         ) : (
-          <li>No stocks available</li>
+          <Grid size={12}>
+            <Typography>No stocks available</Typography>
+          </Grid>
         )}
-      </ul>
-    </div>
+      </Grid>
+    </Box>
   );
 }
 
