@@ -422,17 +422,22 @@ app.get('/api/verify-email', async (req, res) => {
   }
 });
 
-app.post('/api/login', async (req, res) => { //route for login
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) { //validating inputs
+  if (!username || !password) { // Validate inputs
     return res.status(403).json({ error: "Username and password are required." });
   }
 
   try {
-    const user = await User.findOne({ username }); //checking if user exists
+    const user = await User.findOne({ username }); // Check if user exists
     if (!user) {
       return res.status(403).json({ error: "Invalid username or password." });
+    }
+
+    // Check if the user is verified
+    if (!user.verified) {
+      return res.status(403).json({ error: "User is not verified. Please check your email to verify your account. You may want to check your spam or junk folder." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -441,7 +446,7 @@ app.post('/api/login', async (req, res) => { //route for login
     }
 
     const userData = user.toObject();
-    delete userData.password; //removing password
+    delete userData.password; // Remove the password from the response
 
     res.status(200).json({ message: "Login successful", user: userData });
   } catch (error) {
@@ -449,7 +454,6 @@ app.post('/api/login', async (req, res) => { //route for login
     res.status(500).json({ error: "Internal server error." });
   }
 });
-
 
 // 4Start the server
 app.listen(PORT, '0.0.0.0', () => {
