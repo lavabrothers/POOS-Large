@@ -9,7 +9,8 @@ const userSchema = new Schema({
   password: { type: String, required: true },  //storing the hashed password
   firstName: { type: String, required: true },
   lastName:  { type: String, required: true },
-  verified: {type: Boolean, default: false }
+  verified: {type: Boolean, default: false },
+  verificationToken: String,
 }, { timestamps: true });
 
 module.exports = mongoose.model('UserTest', userSchema, 'Users'); //actualy returning the model
