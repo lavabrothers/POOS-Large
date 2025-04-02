@@ -67,8 +67,8 @@ app.get('/api/stocks/:symbol', async (req, res) => {
       return new Date(Math.max(...dates));
     };
 
-    // Define the threshold as roughly 3 months (90 days)
-    const QUARTER_MILLISECONDS = 100 * 24 * 60 * 60 * 1000;
+    // Define the threshold as roughly 3 months (90 days) - (Changed to 200 days to fix late entries)
+    const QUARTER_MILLISECONDS = 200 * 24 * 60 * 60 * 1000;
 
     // If already in databse and up-to-date, return from our database (BYPASS ALPHA VANTAGE API)
     if (stockDoc) { // Is symbol already in database?
