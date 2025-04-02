@@ -27,9 +27,9 @@ function Home() {
     window.location.href = '/favorites';
   }
   // Function to navigate to the stock's detail page
-  function goToStockPage (symbol: string): void {
-      window.location.href = `/stocks/${symbol}`;
-    };
+  function goToStockInfoPage (stock: { symbol: string }) {
+    window.location.href = `/stocks/${stock.symbol}`;
+  };
 
   // Fetch all stocks and the user's favorites, then filter out favorites from the list
   useEffect(() => {
@@ -118,12 +118,16 @@ function Home() {
           {stocks.length > 0 ? (
             stocks.map((stock) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
-                <StockCard stock={stock} onAddFavorite={addFavorite} />
+                <StockCard
+                  stock={stock}
+                  onAddFavorite={addFavorite}
+                  onSymbolClick={goToStockInfoPage} // pass the symbol click handler
+                />
               </Grid>
             ))
           ) : (
-            <Grid size={12}>
-              <Typography>No stocks available</Typography>
+            <Grid size ={12}>
+              <Typography>No favorites added.</Typography>
             </Grid>
           )}
         </Grid>
