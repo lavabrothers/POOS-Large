@@ -20,4 +20,4 @@ const infoSchema = new Schema({
 }, { timestamps: true });
 
 const StockInfo = mongoose.model('StockInfo', infoSchema);
-export default Stock;
+export default StockInfo;
