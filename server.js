@@ -161,6 +161,22 @@ app.get('/api/stocks/:symbol', async (req, res) => {
   }
 });
 
+app.get('/api/stockInfo/', async(req, res) =>{
+  const { ticker } = req.query;
+  try{
+    const stock = await StockInfo.findOne({ticker: ticker.toUpperCase()});
+
+    if(!stock){
+      return res.status(404).json({message: 'Stock not found'});
+    }
+
+    res.json(stock);
+
+  }catch (error) {
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 // creates the favorites list of a user, this is used for the signup
 app.post('/api/favorites/create', async (req, res) => {
   const {userId, stocks} = req.body;
@@ -173,7 +189,6 @@ app.post('/api/favorites/create', async (req, res) => {
     await newFavorite.save();
     res.status(201).json({ message: "Favorites list created successfully." });
   } catch (error) {
-    console.error("Error during favorites creation:", error);
     res.status(500).json({ error: "Internal server error." });
   }
   
