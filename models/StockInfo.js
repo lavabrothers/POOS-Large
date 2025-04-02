@@ -19,5 +19,4 @@ const infoSchema = new Schema({
   "tag 3": { type: String },
 }, { timestamps: true });
 
-const StockInfo = mongoose.model('StockInfo', infoSchema);
-export default StockInfo;
+module.exports = mongoose.model('StockInfo', infoSchema);
