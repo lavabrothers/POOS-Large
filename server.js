@@ -7,10 +7,10 @@ require('dotenv').config();
 const bcrypt = require('bcrypt'); //for hashing passwords
 const User = require('./models/User'); //for user signup api
 const Favorite = require('./models/Favorite');
-//const StockInfo = require('./models/StockInfo');
+const StockInfo = require('./models/StockInfo');
 
 // Connect to MongoDB
-//console.log("MONGO_URI:", process.env.MONGO_URI);
+//console.log("MONGO_URI:", process.env.MONGO_URI); 
 mongoose.connect(process.env.MONGO_URI).then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("MongoDB connection error:", err));
 
