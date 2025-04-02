@@ -1,5 +1,5 @@
 // models/StockInfo
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const infoSchema = new Schema({
