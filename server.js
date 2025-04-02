@@ -3,10 +3,12 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
-require('dotenv').config();
 const bcrypt = require('bcrypt'); //for hashing passwords
 const User = require('./models/User'); //for user signup api
 const Favorite = require('./models/Favorite');
+const postmark = require("postmark");
+const postmarkClient = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
+const crypto = require('crypto');
 const StockInfo = require('./models/StockInfo');
 
 // Connect to MongoDB
@@ -288,51 +290,134 @@ app.post('/api/signup', async (req, res) => {
     return res.status(403).json({ error: "All fields are required." });
   }
 
+  // Basic regex check for email
+  const emailValidate = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!emailValidate.test(email)) {
+    return res.status(403).json({ error: "Invalid email." });
+  }
+
   try {
-    const existingUser = await User.findOne({ email }); //checking if user already exists
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(403).json({ error: "A user with that email already exists." });
     }
     console.log("checking username: ", username);
-    const usernameTaken = await User.findOne({ username }); //checking if username is taken
+    const usernameTaken = await User.findOne({ username });
     if (usernameTaken) {
       return res.status(403).json({ error: "Username is taken." });
     }
-
-    const emailValidate = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if(!emailValidate.test(email)){
-      return res.status(403).json({ error: "Invalid email."})
-    }
   
+    // Validate and hash password
+    if (
+      !(
+        password.length >= 8 &&
+        /[a-zA-Z]/.test(password) &&
+        /[0-9]/.test(password) &&
+        /[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(password)
+      )
+    ) {
+      return res.status(403).json({ 
+        error: "Password must be 8+ characters long and contain at least one letter, one number, and one special character." 
+      });
+    }    
   
-    // makes sure the password is more than 8 chars, contains at least one letter
-    // contains at least one number, and a special character
-    if( !( password.length >= 8 && 
-      (/[a-zA-Z]/.test(password) && 
-      (/[0-9]/.test(password) && 
-      (/[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(password))))
-        ) ) {
-          return res.status(403).json({ error: "Password must be 8+ characters long. Also contain at least one letter, number, and special character."});
-    }
-
-
-    const hashedPassword = await bcrypt.hash(password, 10); //hashing the password
-
-    const newUser = new User({ //making a new user w/ the user Model
+    const hashedPassword = await bcrypt.hash(password, 10);
+  
+    const newUser = new User({
       username,
       email,
-      password: hashedPassword, // store the hashed password
+      password: hashedPassword,
       firstName,
-      lastName
+      lastName,
+      verified: false
+    });
+  
+    // Generate a verification token and expiration (1 hour)
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    console.log("Generated token:", verificationToken); //TODO: Deleteme
+    newUser.verificationToken = verificationToken;
+
+    // Save the new user
+    await newUser.save();
+
+    // Construct the verification URL
+    const verificationUrl = `http://134.122.3.46:3000/api/verify?token=${verificationToken}`;
+
+    // Prepare the email message using Postmark
+    postmarkClient.sendEmail({
+      "From": "lo859155@ucf.edu", // Must be a verified sender in Postmark - Logan's UCF email
+      "To": newUser.email,
+      "Subject": "Verify your email address",
+      "TextBody": `Please verify your email by clicking the following link: ${verificationUrl}`,
+      "HtmlBody": `<p>Thank you for joining Finstats!\n\nPlease verify your email by clicking <a href="${verificationUrl}">here</a>.</p>`
+    }).then(response => {
+      console.log('Verification email sent:', response);
+    }).catch(error => {
+      console.error('Error sending verification email:', error);
     });
 
-    await newUser.save(); //saving user to db
-    const user = await User.findOne({ username })
-    const userData = user.toObject()
-    res.status(201).json({ message: "User created successfully.", user: userData});
+    res.status(201).json({ 
+      message: "User created successfully. Please check your email to verify your account.",
+      user: newUser
+    });
   } catch (error) {
     console.error("Error during user signup:", error);
     res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.get('/api/verify', (req, res) => {
+  const token = req.query.token;
+  // Serve an HTML page with a confirmation button
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Verify Your Email</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        button { padding: 10px 20px; font-size: 16px; }
+      </style>
+    </head>
+    <body>
+      <h1>Confirm Your Email Address</h1>
+      <p>To verify your email, please click the confirm button below.</p>
+      <form action="/api/verify-email" method="GET">
+        <input type="hidden" name="token" value="${token}" />
+        <button type="submit">Confirm</button>
+      </form>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/api/verify-email', async (req, res) => {
+  const token = req.query.token;
+  console.log("Received token:", token); //TODO: DELETEME
+  if (!token) {
+    return res.status(400).send('Verification token is missing.');
+  }
+
+  try {
+    // Find the user with the matching token
+    const user = await User.findOne({ verificationToken: token });
+    console.log("User found:", user); //TODO: DELETME
+
+    if (!user) {
+      return res.status(400).send('Verification token is invalid or has expired.');
+    }
+
+    // Update the user's status to verified and remove the token fields
+    user.verified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    res.send('Email verified successfully! You can now log in.');
+  } catch (error) {
+    console.error('Error during email verification:', error);
+    res.status(500).send('Internal server error.');
   }
 });
 
