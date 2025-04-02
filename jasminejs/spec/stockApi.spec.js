@@ -1,24 +1,25 @@
+// Uses UnitTester user with id 67ec9ea0b4d17f170bd40839 to test functions
 
-
-/*
-async function requestStockInfo(js) {
-    const response = await fetch('http://134.122.3.46:3000/api/stockInfo', {
-        method: 'GET',
-        query: js,
-        headers: { 'Content-Type': 'application/json' }});
-    
-        return { res: JSON.parse(await response.text()), status: response.status };
+async function requestStockInfo(symbol) {
+    const response = await fetch(`http://134.122.3.46:3000/api/stockInfo?ticker=${symbol}`);
+    return { res: JSON.parse(await response.text()), status: response.status };
 }
 
 describe("Testing stockInfo API: ", function () {
-    it('Should do stuff', async function () {
-        var js = JSON.stringify({ ticker: 'AAPL' })
-        var { res, status } = await requestStockInfo(js)
+    it('Should show info for AAPL', async function () {
+        var { res, status } = await requestStockInfo('AAPL')
         expect(res.error).toBeNull
-        console.log(res)
+        expect(status).toBe(200)
+        expect(res.message)
+    })
+
+    it('Should fail for non-existing stock', async function () {
+        var { res, status } = await requestStockInfo('BOGUS')
+        expect(res.error).toBeNull
+        expect(status).toBe(404)
+        expect(res.message).toBe('Stock not found')
     })
 })
-*/
 
 async function requestStocks() {
     const response = await fetch(`http://134.122.3.46:3000/api/stocks`);
