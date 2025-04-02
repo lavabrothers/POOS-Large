@@ -7,6 +7,7 @@ require('dotenv').config();
 const bcrypt = require('bcrypt'); //for hashing passwords
 const User = require('./models/User'); //for user signup api
 const Favorite = require('./models/Favorite');
+const StockInfo = require('./models/StockInfo');
 
 // Connect to MongoDB
 //console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -161,7 +162,7 @@ app.get('/api/stocks/:symbol', async (req, res) => {
   }
 });
 
-app.get('/api/stockInfo/', async(req, res) =>{
+app.get('/api/stockInfo', async(req, res) =>{
   const { ticker } = req.query;
   try{
     const stock = await StockInfo.findOne({ticker: ticker.toUpperCase()});
