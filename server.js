@@ -416,6 +416,10 @@ app.get('/api/verify-email', async (req, res) => {
     await user.save();
 
     res.send('Email verified successfully! You can now log in.');
+
+    // Clear verification token
+    user.verificationToken = undefined;
+    await user.save();
   } catch (error) {
     console.error('Error during email verification:', error);
     res.status(500).send('Internal server error.');
@@ -451,6 +455,165 @@ app.post('/api/login', async (req, res) => {
     res.status(200).json({ message: "Login successful", user: userData });
   } catch (error) {
     console.error("Error during login:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.post('/api/request-password-reset', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email is required." });
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(200).json({ message: "Email does not exist in our database." });
+    }
+
+    // Generate a reset token (overwriting verificationToken)
+    const token = crypto.randomBytes(20).toString('hex');
+    user.verificationToken = token;
+    await user.save();
+
+    const resetUrl = `http://134.122.3.46:3000/api/reset-password?token=${token}`;
+
+    postmarkClient.sendEmail({
+      From: "lo859155@ucf.edu",
+      To: user.email,
+      Subject: "Password Reset Request",
+      TextBody: `You requested a password reset. Click this link to reset your password: ${resetUrl}`,
+      HtmlBody: `<p>You requested a password reset. Click <a href="${resetUrl}">here</a> to reset your password.</p>`
+    }).then(response => {
+      console.log('Password reset email sent:', response);
+    }).catch(error => {
+      console.error('Error sending password reset email:', error);
+    });
+
+    res.status(200).json({ message: "A reset link has been be sent." });
+  } catch (err) {
+    console.error('Error in request password reset:', err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.get('/api/reset-password', async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Token is missing." });
+  }
+
+  // Wait for the user to be found
+  const user = await User.findOne({ verificationToken: token });
+  if (!user) {
+    return res.status(400).json({ error: "Token is invalid." });
+  }
+
+  // Serve a simple HTML page with a form to reset the password
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Reset Your Password</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        input { padding: 10px; margin: 5px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        #feedback { margin-top: 20px; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <h1>Reset Your Password</h1>
+      <form id="resetForm">
+        <input type="hidden" name="token" value="${token}" />
+        <div>
+          <input type="password" name="newPassword" placeholder="New Password" required />
+        </div>
+        <div>
+          <input type="password" name="confirmPassword" placeholder="Confirm New Password" required />
+        </div>
+        <button type="submit">Reset Password</button>
+      </form>
+      <div id="feedback"></div>
+
+      <script>
+        const form = document.getElementById('resetForm');
+        const feedback = document.getElementById('feedback');
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const token = form.elements.token.value;
+          const newPassword = form.elements.newPassword.value;
+          const confirmPassword = form.elements.confirmPassword.value;
+
+          try {
+            const res = await fetch('/api/reset-password', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ token, newPassword, confirmPassword })
+            });
+
+            const data = await res.json();
+            if (data.error) {
+              feedback.textContent = data.error;
+              feedback.style.color = "red";
+            } else {
+              feedback.textContent = data.message || "Password has been reset successfully!";
+              feedback.style.color = "green";
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            feedback.textContent = "An error occurred. Please try again.";
+            feedback.style.color = "red";
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+app.post('/api/reset-password', async (req, res) => {
+  const { token, newPassword, confirmPassword } = req.body;
+
+  if (!token || !newPassword || !confirmPassword) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: "Passwords do not match." });
+  }
+
+  try {
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) {
+      return res.status(400).json({ error: "Password reset token is invalid." });
+    }
+
+    // Validate new password complexity
+    if (
+      !(
+        newPassword.length >= 8 &&
+        /[a-zA-Z]/.test(newPassword) &&
+        /[0-9]/.test(newPassword) &&
+        /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(newPassword)
+      )
+    ) {
+      return res.status(403).json({
+        error: "Password must be 8+ characters long and contain at least one letter, one number, and one special character."
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.verificationToken = undefined; // Clear token field
+    await user.save();
+
+    // Return JSON so the client can call res.json()
+    return res.json({ message: "Password has been reset successfully! You can now log in." });
+  } catch (err) {
+    console.error('Error resetting password:', err);
     res.status(500).json({ error: "Internal server error." });
   }
 });
