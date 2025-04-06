@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import stocks from './stocklist.tsx'
 import alterFav from './alterfav.tsx';
 
