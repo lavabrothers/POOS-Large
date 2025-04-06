@@ -13,6 +13,9 @@ function Home() {
   let name: string = "";
   const userString = localStorage.getItem('user_data');
   let user: any;
+  if(addingFavorite){ //we gotta keep this in to get rid of a stupid error. 
+    
+  }
 
   if (userString && userString !== "") {
     user = JSON.parse(userString);
