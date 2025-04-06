@@ -11,7 +11,6 @@ const stocks = [
     {symbol: 'NVDA', name: 'Nvidia'},
     {symbol: 'AMZN', name: 'Amazon'},
     {symbol: 'JNJ', name: 'Johnson & Johnson'},
-    {symbol: 'GME', name: 'GameStop'},
     {symbol: 'AMD', name: 'Advanced Micro Devices'},
     {symbol: 'CRM', name: 'Salesforce'}
 ]
