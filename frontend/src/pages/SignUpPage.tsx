@@ -1,17 +1,19 @@
-import SignUp from '../components/SignUp.tsx';
-import Box from '@mui/material/Box';
+import React from 'react';
+import { Box } from '@mui/material';
+import SignUp from '../components/SignUp';
 
-
-const SignUpPage = () => 
-  {
-
-    return(
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-        <Box display="flex" flexDirection="row" alignItems="flex-start" justifyContent="center" gap={4}>
-          <SignUp />
-        </Box>
-      </Box>
-    );
+const SignUpPage = () => {
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"  
+      alignItems="center"     
+      minHeight="100vh"        
+    >
+      <SignUp />
+    </Box>
+  );
 };
 
 export default SignUpPage;
