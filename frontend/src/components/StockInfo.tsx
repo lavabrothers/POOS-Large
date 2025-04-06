@@ -16,6 +16,9 @@ interface StockData {
 function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   // Retrieve user data
   let name = "";
+  if(name){ //empty function to get rid of errors.
+
+  }
   const userString = localStorage.getItem('user_data');
   let user: any;
   if (userString && userString !== "") {
