@@ -1,4 +1,3 @@
-import React from "react";
 import stocklist from './stocklist'
 
 async function alterFav( op : string, id : string, symbol : string,) : Promise<boolean> {

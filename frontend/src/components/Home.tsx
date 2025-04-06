@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {Grid, Typography, Button, Box, Slide, Grow} from '@mui/material'
+import { useState, useEffect } from 'react';
+import {Grid, Typography, Button, Box, Grow} from '@mui/material'
 import StockCard from './StockCard';
 
 function Home() {

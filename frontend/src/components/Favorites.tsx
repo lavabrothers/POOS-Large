@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Grid, Typography, Button, Box, Grow } from '@mui/material';
 import StockCard from './StockCard';
 
