@@ -10,7 +10,7 @@ describe("Testing stockInfo API: ", function () {
         var { res, status } = await requestStockInfo('AAPL')
         expect(res.error).toBeNull
         expect(status).toBe(200)
-        expect(res.message)
+        expect(res['short name']).toBe('Apple')
     })
 
     it('Should fail for non-existing stock', async function () {

@@ -37,6 +37,13 @@ function Favorites() {
           throw new Error(`HTTP error: ${response.status}`);
         }
         const data = await response.json();
+        for (const fav of data.stocks) {
+          if (fav.name == undefined || fav.name == 'test') {
+            const response = await fetch(`http://134.122.3.46:3000/api/stockInfo?ticker=${fav.symbol}`)
+            var res = JSON.parse(await response.text())
+            fav.name = res['short name']
+          }
+        }
         setFavorites(data.stocks);
       } catch (err: any) {
         console.error("Error fetching favorites:", err);

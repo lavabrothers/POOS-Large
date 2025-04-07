@@ -90,12 +90,11 @@ const StockCard: React.FC<StockCardProps> = ({
               sx={{ mt: 2 }}
               >
           
-              {stock.symbol}
+              {stock.name + ' (' + stock.symbol + ')'}
             </Button>
           ) : (
             stock.symbol
           )}
-          {stock.name ? ` - ${stock.name}` : ''}
         </Typography>
         {loading && <Typography>Loading earnings...</Typography>}
         {error && <Typography color="error">{error}</Typography>}
