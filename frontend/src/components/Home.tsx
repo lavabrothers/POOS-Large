@@ -1,48 +1,172 @@
-import { createTheme } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
+import { Grid, Typography, Button, Box, Grow, TextField } from '@mui/material';
+import StockCard from './StockCard';
 
-const darkNeonTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#238691', // neon teal accent
-    },
-    secondary: {
-      main: '#ff6a3d', // neon orange accent
-    },
-    background: {
-      default: '#121212',
-      paper: '#1C1C1C',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#aaaaaa',
-    },
-  },
-  components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
+function Home() {
+  const [stocks, setStocks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [addingFavorite, setAddingFavorite] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Retrieve user data from localStorage
+  let name: string = "";
+  const userString = localStorage.getItem('user_data');
+  let user: any;
+
+  if (userString && userString !== "") {
+    user = JSON.parse(userString);
+    name = user.firstName;
+  } else {
+    window.location.href = '/';
+    return <Box></Box>;
+  }
+
+  // Navigate to the Favorites page
+  function goToFavorites(): void {
+    window.location.href = '/favorites';
+  }
+
+  // Function to navigate to the stock's detail page
+  function goToStockInfoPage(stock: { symbol: string }) {
+    window.location.href = `/stocks/${stock.symbol}`;
+  }
+
+  // Fetch all stocks and the user's favorites, then filter out favorites from the list
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch all stocks
+        const stocksResponse = await fetch('http://134.122.3.46:3000/api/stocks');
+        if (!stocksResponse.ok) {
+          throw new Error(`Stocks API error: ${stocksResponse.status}`);
+        }
+        const stocksData = await stocksResponse.json();
+
+        // Fetch user's favorites using the search endpoint
+        const favResponse = await fetch(`http://134.122.3.46:3000/api/favorites/search?userId=${user._id}`);
+        let favoriteSymbols = new Set<string>();
+        if (favResponse.ok) {
+          const favData = await favResponse.json();
+          // Expecting favData to have a "stocks" array
+          favoriteSymbols = new Set(
+            favData.stocks.map((fav: { symbol: string }) => fav.symbol)
+          );
+        } else if (favResponse.status === 404) {
+          console.warn('No favorites found for this user.');
+        } else {
+          throw new Error(`Favorites API error: ${favResponse.status}`);
+        }
+
+        // Filter out stocks that are already favorited
+        const filteredStocks = stocksData.filter((stock: { symbol: string }) => !favoriteSymbols.has(stock.symbol));
+        setStocks(filteredStocks);
+      } catch (err: any) {
+        console.error("Error fetching data:", err);
+        setError("Error fetching stocks");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [user._id]);
+
+  // Handler for search bar
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter stocks based on search query (case-insensitive)
+  const filteredStocks = stocks.filter(stock =>
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Function to add a stock to favorites
+  const addFavorite = async (stock: { symbol: string; name?: string }) => {
+    setAddingFavorite(true);
+    setAddError(null);
+    try {
+      const response = await fetch('http://134.122.3.46:3000/api/favorites/add', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          symbol: stock.symbol,
+          stockName: stock.name || "test" // in case you have a name field
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error adding favorite');
+      }
+      // Remove the added stock from the displayed list
+      setStocks(prev => prev.filter(s => s.symbol !== stock.symbol));
+    } catch (err: any) {
+      console.error("Error adding favorite:", err);
+      setAddError("Error adding favorite: " + err.message);
+    } finally {
+      setAddingFavorite(false);
+    }
+  };
+
+  if (loading) return <Box>Loading stocks...</Box>;
+  if (error) return <Box>{error}</Box>;
+
+  return (
+    <Box
+      id="homeDiv"
+      sx={{
+        padding: 2,
+        bgcolor: 'background.default', 
+        color: 'text.primary',         
+      }}
+    >
+      <Typography variant="h4">Welcome Home, {name}!</Typography>
+      <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2 }}>
+        Favorites
+      </Button>
+      {addError && <Typography color="error">{addError}</Typography>}
+
+      <TextField
+        fullWidth
+        placeholder="Search stocks (Symbols)..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+        sx={{
+          mb: 2,
+          borderRadius: '50px',
           '& .MuiOutlinedInput-root': {
-            backgroundColor: '#262626',
-            '& fieldset': { borderColor: '#333' },
-            '&:hover fieldset': { borderColor: '#555' },
-            '&.Mui-focused fieldset': { borderColor: '#00ffcc' },
+            borderRadius: '50px',
           },
-          '& .MuiInputLabel-root': {
-            color: '#aaa',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          
-        },
-      },
-    },
-  },
-});
+        }}
+      />
 
-export default darkNeonTheme;
+      <Grow in={!loading}>
+        <Grid container spacing={2}>
+          {filteredStocks.length > 0 ? (
+            filteredStocks.map((stock) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
+                <StockCard
+                  stock={stock}
+                  onAddFavorite={addFavorite}
+                  onSymbolClick={goToStockInfoPage}
+                />
+              </Grid>
+            ))
+          ) : (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Typography>No stocks match your search.</Typography>
+            </Grid>
+          )}
+        </Grid>
+      </Grow>
+    </Box>
+  );
+}
+
+export default Home;
+
