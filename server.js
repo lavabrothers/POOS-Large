@@ -11,6 +11,7 @@ const postmark = require("postmark");
 const postmarkClient = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
 const crypto = require('crypto');
 const StockInfo = require('./models/StockInfo');
+const jwt = require('jsonwebtoken');
 
 // Connect to MongoDB
 //console.log("MONGO_URI:", process.env.MONGO_URI); 
@@ -45,7 +46,23 @@ app.use((req, res, next) => {
 app.use(express.json()); //for parsing json
 const PORT = process.env.PORT || 3000;
 
-app.get('/api/stocks', async (req, res) => {
+const authenticateJWT = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Access denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user info to the request object
+    next();
+  } catch (error) {
+    res.status(403).json({ error: "Invalid or expired token." });
+  }
+};
+
+app.get('/api/stocks', authenticateJWT, async (req, res) => {
   try {
     const stocks = await Stock.find({}).select('symbol -_id');
     res.json(stocks);
@@ -56,7 +73,7 @@ app.get('/api/stocks', async (req, res) => {
 
 
 // Define the route
-app.get('/api/stocks/:symbol', async (req, res) => {
+app.get('/api/stocks/:symbol', authenticateJWT, async (req, res) => {
   try {
     const symbol = req.params.symbol.toUpperCase();
     let stockDoc = await Stock.findOne({ symbol });
@@ -165,7 +182,7 @@ app.get('/api/stocks/:symbol', async (req, res) => {
   }
 });
 
-app.get('/api/stockInfo', async(req, res) =>{
+app.get('/api/stockInfo', authenticateJWT, async(req, res) =>{
   const { ticker } = req.query;
   try{
     const stock = await StockInfo.findOne({ticker: ticker.toUpperCase()});
@@ -182,7 +199,7 @@ app.get('/api/stockInfo', async(req, res) =>{
 });
 
 // creates the favorites list of a user, this is used for the signup
-app.post('/api/favorites/create', async (req, res) => {
+app.post('/api/favorites/create', authenticateJWT, async (req, res) => {
   const {userId, stocks} = req.body;
   try{
     const found = await Favorite.findOne({ userId });
@@ -199,7 +216,7 @@ app.post('/api/favorites/create', async (req, res) => {
 });
 
 // remove a single stock from a user's favorite list
-app.put('/api/favorites/remove', async (req, res) => {
+app.put('/api/favorites/remove', authenticateJWT, async (req, res) => {
   const { userId, symbol } = req.body;
 
   try {
@@ -228,7 +245,7 @@ app.put('/api/favorites/remove', async (req, res) => {
   }
 });
 
-app.put('/api/favorites/add', async(req, res) => {
+app.put('/api/favorites/add', authenticateJWT, async(req, res) => {
   const { userId, symbol, stockName } = req.body;
 
   try{
@@ -259,7 +276,7 @@ app.put('/api/favorites/add', async(req, res) => {
   }
 }); 
 
-app.get('/api/favorites/search', async(req, res) => {
+app.get('/api/favorites/search', authenticateJWT, async(req, res) => {
   const { userId, query } = req.query;
 
   try{
@@ -439,7 +456,8 @@ app.post('/api/login', async (req, res) => {
       return res.status(403).json({ error: "Invalid username or password." });
     }
 
-    // Check if the user is verified
+// Check if the user is verified
+
     if (!user.verified) {
       return res.status(403).json({ error: "User is not verified. Please check your email to verify your account. You may want to check your spam or junk folder." });
     }
@@ -449,10 +467,14 @@ app.post('/api/login', async (req, res) => {
       return res.status(403).json({ error: "Invalid username or password." });
     }
 
-    const userData = user.toObject();
-    delete userData.password; // Remove the password from the response
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
 
-    res.status(200).json({ message: "Login successful", user: userData });
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "Internal server error." });
@@ -619,7 +641,7 @@ app.post('/api/reset-password', async (req, res) => {
 });
 
 // New API endpoint for the news ticker
-app.get('/api/newsticker', async (req, res) => {
+app.get('/api/newsticker', authenticateJWT, async (req, res) => {
   try {
     const newsApiKey = process.env.NEWS_API_KEY;
     if (!newsApiKey) {
