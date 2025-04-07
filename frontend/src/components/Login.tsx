@@ -54,7 +54,9 @@ const [loading, setLoading] = React.useState(false);
         setMessage('User/Password combination incorrect');
       } else if ("Username and password are required." === res.error) {
         setMessage('Username and password are required.');
-      } else {
+      } else if ("User is not verified. Please check your email to verify your account. You may want to check your spam or junk folder." === res.error){
+        setMessage('User is not verified. Please check your email to verify your account. You may want to check your spam or junk folder.');
+      }else {
         var user = res.user;
         localStorage.setItem('user_data', JSON.stringify(user));
         setMessage('Login successful!');
