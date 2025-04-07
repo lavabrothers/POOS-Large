@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import stocks from './stocklist.tsx';
 import alterFav from './alterfav.tsx';
+import { ToastContainer, toast, Bounce} from 'react-toastify';
 
 function Onboarding() {
   // Retrieve user data from localStorage
@@ -122,22 +123,43 @@ function Onboarding() {
         </Button>
       </Box>
 
-      <Box sx={{ mb: 2 }}>
-        <img
-          src={`logos/${logo}.jpg`}
-          alt="Stock Logo"
-          width="64"
-          height="64"
-        />
-      </Box>
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        {message}
-      </Typography>
-      <Button variant="contained" onClick={goToHome}>
-        Proceed
-      </Button>
-    </Box>
-  );
+    const notify = () => toast('Onboarding complete! Redirecting to login...', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        onClose: goToLogin
+        });
+
+        function notifyFinished() : void {
+            notify();
+        }
+
+        function goToLogin() : void {
+            window.location.href = '/'
+        }
+    return (
+        <div id="onboardingDiv">
+            <span id="inner-title">WELCOME TO FINANCIAL STATS, {name.toUpperCase()}!</span><br/>
+            <span id="description">Tell us about what stocks you're interested in so we can add them to your dashboard!</span><br/><br/>
+            
+            <input list="stocks" name="stock" id="stock" value={input} onChange={changelogo} />
+            <datalist id="stocks">
+                { stocks.map( d => <option value = {d.symbol + ' (' + d.name + ')'} /> ) }
+            </datalist>
+            <input type="submit" value = 'Add' onClick={addFavorite}/>
+            <input type="button" value = 'Clear' onClick={clearInput}></input><br/><br/>
+            <img src={'logos/' + logo + '.jpg'} alt="Desc" width="64" height="64"></img><br/>
+            <span id='message'>{message}</span><br/><br/>
+            <button type="button" onClick={notifyFinished}>Proceed</button>
+            <ToastContainer />
+        </div>
+    )
 }
 
 export default Onboarding;
