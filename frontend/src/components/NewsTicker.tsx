@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-// Split the API key into two parts to prevent bots from scraping cause im too lazy to make an enviornment variable
-const API_KEY_PART1 = "c740dac6a061445ea31";
-const API_KEY_PART2 = "afa052417f0e2";
-const API_KEY = API_KEY_PART1 + API_KEY_PART2;
-
 const NewsTicker = () => {
   const [headlines, setHeadlines] = useState<{ title: string; url: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${API_KEY}`)
+    fetch('/api/newsticker')
       .then(response => response.json())
       .then(data => {
-        if (data.status === "ok") {
-          const news = data.articles.map((article: any) => ({
+        if (data.status === "ok" && data.articles && Array.isArray(data.articles)) {
+          const news = data.articles.map((article: { title: any; url: any; }) => ({
             title: article.title,
             url: article.url
           }));
