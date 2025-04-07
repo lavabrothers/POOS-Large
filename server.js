@@ -618,6 +618,39 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
+// New API endpoint for the news ticker
+app.get('/api/newsticker', async (req, res) => {
+  try {
+    const newsApiKey = process.env.NEWS_API_KEY;
+    if (!newsApiKey) {
+      return res.status(500).json({ error: "News API key not configured." });
+    }
+    
+    // Call the third-party news API using axios
+    const response = await axios.get('https://newsapi.org/v2/top-headlines', {
+      params: {
+        country: 'us',
+        category: 'business',
+        apiKey: newsApiKey
+      }
+    });
+
+    if (response.data.status === "ok") {
+      // Map the articles to just the title and URL fields
+      const headlines = response.data.articles.map(article => ({
+        title: article.title,
+        url: article.url
+      }));
+      res.json({ status: "ok", articles: headlines });
+    } else {
+      res.status(500).json({ error: "Error fetching headlines", details: response.data });
+    }
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    res.status(500).json({ error: "Error fetching news", details: error.message });
+  }
+});
+
 // 4Start the server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on port ${PORT}`);
