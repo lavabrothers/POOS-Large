@@ -99,7 +99,7 @@ const [loading, setLoading] = React.useState(false);
     setLoading(true);
 
     try{
-      const response = await fetch('http://134.122.3.46:300/api/request-password-reset', {
+      const response = await fetch('http://134.122.3.46:3000/api/request-password-reset', {
         method:'POST',
         body: js,
         headers:{'Content-Type': 'application/json'}});
