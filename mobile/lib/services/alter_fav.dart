@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import '../data/stock_list.dart';
 
 Future<bool> alterFav(String op, String userId, String symbol) async {
-  // Internal helper to create empty favorite list
   Future<bool> createFavList(String id) async {
     final url = Uri.parse('http://134.122.3.46:3000/api/favorites/create');
     final body = jsonEncode({
@@ -12,8 +11,11 @@ Future<bool> alterFav(String op, String userId, String symbol) async {
     });
 
     try {
-      final response = await http.post(url,
-          headers: {'Content-Type': 'application/json'}, body: body);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
       final res = jsonDecode(response.body);
       return res['error'] == null;
     } catch (e) {
@@ -32,17 +34,22 @@ Future<bool> alterFav(String op, String userId, String symbol) async {
     };
   } else if (op == 'a') {
     api = 'add';
-    final stock = stockList.firstWhere(
-          (s) => s['symbol'] == symbol,
-      orElse: () => {'symbol': '', 'name': ''},
-    );
+
+    String stockName = '';
+    for (final stock in stockList) {
+      if (stock['symbol'] == symbol) {
+        stockName = stock['name'] ?? '';
+        break;
+      }
+    }
+
     body = {
       'userId': userId,
       'symbol': symbol,
-      'stockName': stock['name'] ?? '',
+      'stockName': stockName,
     };
   } else {
-    return false;
+    return false; // Invalid op
   }
 
   try {
@@ -55,9 +62,10 @@ Future<bool> alterFav(String op, String userId, String symbol) async {
 
     final res = jsonDecode(response.body);
 
+    // If favorites list doesn't exist, try to create it once
     if (res['message'] == 'Favorites not found for this user.') {
       if (await createFavList(userId)) {
-        return await alterFav(op, userId, symbol); // Retry once
+        return await alterFav(op, userId, symbol); // retry
       } else {
         return false;
       }

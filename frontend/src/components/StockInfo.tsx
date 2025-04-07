@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
-import Chart from 'react-apexcharts';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography, Grid,} from '@mui/material';
+import Chart_Earnings from './Chart_Earnings';
+import Chart_BalanceSheet, { BalanceSheetEntry } from './Chart_BalanceSheet';
+import Chart_Dividends from './Chart_Dividends';
+import Chart_IncomeStatements from './Chart_IncomeStatements';
+import Chart_CashFlow from './Chart_CashFlow';
+
+
 
 interface StockData {
   symbol: string;
-
   dividends: Array<{ ex_dividend_date: string; amount: number }>;
   incomeStatements: Array<{ fiscalDateEnding: string; netIncome: number }>;
   balanceSheets: Array<{ fiscalDateEnding: string; totalAssets: number }>;
   cashFlows: Array<{ fiscalDateEnding: string; netIncome: number }>;
   earnings: Array<{ fiscalDateEnding: string; reportedEPS: string }>;
 }
-
 
 function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   // Retrieve user data
@@ -27,10 +31,6 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   } else {
     window.location.href = '/';
     return <div></div>;
-  }
-
-  function goToHome() {
-    window.location.href = '/home';
   }
 
   const [loading, setLoading] = useState(true);
@@ -59,136 +59,87 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
       });
   }, [stockSymbol]);
 
-
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   if (!stockData) return <p>No stock data available.</p>;
 
-  
+  // For Dividends
+  const sortedDividends = [...stockData.dividends].sort(
+    (a, b) => new Date(a.ex_dividend_date).getTime() - new Date(b.ex_dividend_date).getTime()
+  );
+  const dividendDates = sortedDividends.map(item => item.ex_dividend_date);
+  const dividendValues = sortedDividends.map(item => item.amount);
+
+  // For Income Statements (Net Income)
+  const sortedIncomeStatements = [...stockData.incomeStatements].sort(
+    (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
+  );
+  const incomeDates = sortedIncomeStatements.map(item => item.fiscalDateEnding);
+  const incomeValues = sortedIncomeStatements.map(item => item.netIncome);
+
+  // For Balance Sheets (Total Assets) – using the latest balance sheet for a pie chart breakdown
+  const sortedBalanceSheets = [...stockData.balanceSheets].sort(
+    (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
+  );
+  const latestBalanceSheet = sortedBalanceSheets[sortedBalanceSheets.length - 1];
+
+  // For Earnings (Reported EPS)
+  const sortedEarnings = [...stockData.earnings].sort(
+    (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
+  );
+  const earningsDates = sortedEarnings.map(item => item.fiscalDateEnding);
+  const earningsValues = sortedEarnings.map(item => parseFloat(item.reportedEPS));
 
 
 
-// For Dividends
-const sortedDividends = [...stockData.dividends].sort(
-  (a, b) => new Date(a.ex_dividend_date).getTime() - new Date(b.ex_dividend_date).getTime()
-);
-const dividendDates = sortedDividends.map(item => item.ex_dividend_date);
-const dividendValues = sortedDividends.map(item => item.amount);
-
-// For Income Statements (e.g., Revenue)
-const sortedIncomeStatements = [...stockData.incomeStatements].sort(
-  (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
-);
-const incomeDates = sortedIncomeStatements.map(item => item.fiscalDateEnding);
-const incomeValues = sortedIncomeStatements.map(item => item.netIncome);
-
-// For Balance Sheets (e.g., Total Assets)
-const sortedBalanceSheets = [...stockData.balanceSheets].sort(
-  (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
-);
-const balanceDates = sortedBalanceSheets.map(item => item.fiscalDateEnding);
-const balanceValues = sortedBalanceSheets.map(item => item.totalAssets);
-
-// For Cash Flows (e.g., Operating Cash Flow)
-const sortedCashFlows = [...stockData.cashFlows].sort(
-  (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
-);
-const cashFlowDates = sortedCashFlows.map(item => item.fiscalDateEnding);
-const cashFlowValues = sortedCashFlows.map(item => item.netIncome);
-
-// For Earnings (Reported EPS)
-const sortedEarnings = [...stockData.earnings].sort(
-  (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
-);
-const earningsDates = sortedEarnings.map(item => item.fiscalDateEnding);
-const earningsValues = sortedEarnings.map(item => parseFloat(item.reportedEPS));
-
-console.log('Dividends:', stockData.dividends);
-console.log('Income Statements:', stockData.incomeStatements);
-console.log('Cash Flows:', stockData.cashFlows);
-
+  // ----- Cash Flow Double Bar Chart Breakdown -----
+  // We assume your cash flow object now includes additional fields for a breakdown:
+  const sortedCashFlows = [...stockData.cashFlows].sort(
+    (a, b) => new Date(a.fiscalDateEnding).getTime() - new Date(b.fiscalDateEnding).getTime()
+  );
+  const cashFlowDates = sortedCashFlows.map(item => item.fiscalDateEnding);
+  const parseValue2 = (val: any) => (val && val !== "None" ? Number(val) : 0);
+  const operatingCFValues = sortedCashFlows.map(item => parseValue2((item as any).operatingCashflow));
+  const financingCFValues = sortedCashFlows.map(item => parseValue2((item as any).cashflowFromFinancing));
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <Box
+    id="stockinfoDiv"
+    sx={{ padding: 2, bgcolor: 'background.default', color: 'text.primary' }}
+
+    >
       <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
-      <Button onClick={goToHome}>Home</Button>
+{/*-----------------Top Row: Balance Sheet and Earnings----------------------*/}
+      {/* Balance Sheet  */}
+      <Grid container spacing={2} sx={{ mt: 10 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+         <Chart_BalanceSheet balanceSheet={latestBalanceSheet as BalanceSheetEntry} />
+        </Grid>
 
+      {/* Earnings */}
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Chart_Earnings dates={earningsDates} values={earningsValues} />
+        </Grid>
+      </Grid>
 
-      {/* Dividends Chart */}
-      <Typography variant="h5" sx={{ mt: 4 }}>Dividends</Typography>
-      <Chart 
-        options={{
-          chart: { id: 'dividends' },
-          xaxis: { categories: dividendDates, title: { text: 'Date' } },
-          yaxis: { title: { text: 'Dividend' } },
-          dataLabels: { enabled: false },
-          stroke: { curve: 'smooth' },
-        }}
-        series={[{ name: 'Dividend', data: dividendValues }]}
-        type="line"
-        height={300}
-      />
+{/*----------------Bottom Row: Dividends, Income Statement, and Cash Flow---------------*/}
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {/* Dividends */}
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+         <Chart_Dividends dates={dividendDates} values={dividendValues} />
+        </Grid>
 
-      {/* Income Statement Chart */}
-      <Typography variant="h5" sx={{ mt: 4 }}>Income Statement (Net Income)</Typography>
-      <Chart 
-        options={{
-          chart: { id: 'income-statement' },
-          xaxis: { categories: incomeDates, title: { text: 'Fiscal Date Ending' } },
-          yaxis: { title: { text: 'Net Income' } },
-          dataLabels: { enabled: false },
-          stroke: { curve: 'smooth' },
-        }}
-        series={[{ name: 'Revenue', data: incomeValues }]}
-        type="line"
-        height={300}
-      />
+        {/* Income Statement */}
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+         <Chart_IncomeStatements dates={incomeDates} values={incomeValues} />
+        </Grid>
 
-      {/* Balance Sheet Chart */}
-      <Typography variant="h5" sx={{ mt: 4 }}>Balance Sheet (Total Assets)</Typography>
-      <Chart 
-        options={{
-          chart: { id: 'balance-sheet' },
-          xaxis: { categories: balanceDates, title: { text: 'Fiscal Date Ending' } },
-          yaxis: { title: { text: 'Total Assets' } },
-          dataLabels: { enabled: false },
-          stroke: { curve: 'smooth' },
-        }}
-        series={[{ name: 'Total Assets', data: balanceValues }]}
-        type="line"
-        height={300}
-      />
-
-      {/* Cash Flow Chart */}
-      <Typography variant="h5" sx={{ mt: 4 }}>Cash Flow (Operating Cash Flow)</Typography>
-      <Chart 
-        options={{
-          chart: { id: 'cash-flow' },
-          xaxis: { categories: cashFlowDates, title: { text: 'Fiscal Date Ending' } },
-          yaxis: { title: { text: 'Operating Cash Flow' } },
-          dataLabels: { enabled: false },
-          stroke: { curve: 'smooth' },
-        }}
-        series={[{ name: 'Operating Cash Flow', data: cashFlowValues }]}
-        type="line"
-        height={300}
-      />
-
-      {/* Earnings Chart */}
-      <Typography variant="h5" sx={{ mt: 4 }}>Earnings (Reported EPS)</Typography>
-      <Chart 
-        options={{
-          chart: { id: 'earnings' },
-          xaxis: { categories: earningsDates, title: { text: 'Fiscal Date Ending' } },
-          yaxis: { title: { text: 'Reported EPS' } },
-          dataLabels: { enabled: false },
-          stroke: { curve: 'smooth' },
-        }}
-        series={[{ name: 'Reported EPS', data: earningsValues }]}
-        type="line"
-        height={300}
-      />
+        {/* Cash Flow */}
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <Chart_CashFlow dates={cashFlowDates} operatingCF={operatingCFValues}  financingCF={financingCFValues} 
+          />
+        </Grid>
+      </Grid>
     </Box>
   );
 }
