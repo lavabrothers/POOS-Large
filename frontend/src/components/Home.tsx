@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, Box, Grow, TextField } from '@mui/material';
 import StockCard from './StockCard';
@@ -14,6 +15,9 @@ function Home() {
   let name: string = "";
   const userString = localStorage.getItem('user_data');
   let user: any;
+  if(addingFavorite){ //we gotta keep this in to get rid of a stupid error. 
+    
+  }
 
   if (userString && userString !== "") {
     user = JSON.parse(userString);
@@ -62,6 +66,11 @@ function Home() {
         // Filter out stocks that are already favorited
         const filteredStocks = stocksData.filter((stock: { symbol: string }) => !favoriteSymbols.has(stock.symbol));
         setStocks(filteredStocks);
+        for (const st of filteredStocks) {
+          const response = await fetch(`http://134.122.3.46:3000/api/stockInfo?ticker=${st.symbol}`)
+          var res = JSON.parse(await response.text())
+          st.name = res['short name']
+        }
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError("Error fetching stocks");

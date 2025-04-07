@@ -2,7 +2,8 @@ import PageTitle from '../components/PageTitle';
 import Home from '../components/Home';
 import { Box } from '@mui/material';
 import Logo from '../components/Logo';
-
+import NewsTicker from '../components/NewsTicker';
+        
 const HomePage = () => {
   return (
     <Box
@@ -14,6 +15,7 @@ const HomePage = () => {
         width: '100%',
       }}
     >
+  <NewsTicker />
       <Logo />
       <Home />
     </Box>
