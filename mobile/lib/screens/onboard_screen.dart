@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/stock_list.dart';
 import '../services/alter_fav.dart';
+import 'home_page.dart';
 
 class OnBoardScreen extends StatefulWidget {
   const OnBoardScreen({super.key});
@@ -14,10 +15,10 @@ class OnBoardScreen extends StatefulWidget {
 
 class _OnBoardScreenState extends State<OnBoardScreen> {
   late Map<String, dynamic> user;
-  String selectedStock = '';
   String logo = 'question';
   String message = '';
   String name = '';
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -43,9 +44,8 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
   }
 
   void onStockInputChanged(String input) {
-    setState(() => selectedStock = input);
-
     String matchedSymbol = 'question';
+
     for (var stock in stockList) {
       final label = '${stock['symbol']} (${stock['name']})';
       if (label == input) {
@@ -54,11 +54,15 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
       }
     }
 
-    setState(() => logo = matchedSymbol);
+    setState(() {
+      logo = matchedSymbol;
+    });
   }
 
   Future<void> addFavorite() async {
-    if (selectedStock.isEmpty) {
+    final input = _controller.text;
+
+    if (input.isEmpty) {
       setState(() => message = 'Select an option from the menu to add.');
       return;
     }
@@ -67,7 +71,7 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
     String companyName = '';
     for (var stock in stockList) {
       final label = '${stock['symbol']} (${stock['name']})';
-      if (label == selectedStock) {
+      if (label == input) {
         symbol = stock['symbol']!;
         companyName = stock['name']!;
         break;
@@ -82,28 +86,31 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
         message = success
             ? 'Added $companyName to your favorites. Feel free to add more!'
             : 'Failed to add.';
-        selectedStock = '';
+        _controller.clear();
         logo = 'question';
       });
     }
   }
 
   void clearInput() {
+    _controller.clear();
     setState(() {
-      selectedStock = '';
       logo = 'question';
       message = '';
     });
   }
 
   void goToHome() {
-    // TODO: Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Welcome, ${name.toUpperCase()}')),
+      appBar: AppBar(title: Text('Welcome to Financial Stats, ${name.toUpperCase()}!')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -121,11 +128,14 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
                     .where((option) =>
                     option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
               },
-              onSelected: onStockInputChanged,
+              onSelected: (selection) {
+                _controller.text = selection;
+                onStockInputChanged(selection);
+              },
               fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                controller.text = selectedStock;
+                _controller.text = controller.text;
                 return TextField(
-                  controller: controller,
+                  controller: _controller,
                   focusNode: focusNode,
                   decoration: const InputDecoration(labelText: 'Search Stocks'),
                   onChanged: onStockInputChanged,
@@ -165,7 +175,10 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
-            ElevatedButton(onPressed: goToHome, child: const Text('Proceed')),
+            ElevatedButton(
+              onPressed: goToHome,
+              child: const Text('Proceed'),
+            ),
           ],
         ),
       ),
