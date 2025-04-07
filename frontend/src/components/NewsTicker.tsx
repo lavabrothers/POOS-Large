@@ -5,7 +5,7 @@ const NewsTicker = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/newsticker')
+    fetch('http://134.122.3.46:3000/api/newsticker')
       .then(response => response.json())
       .then(data => {
         if (data.status === "ok" && data.articles && Array.isArray(data.articles)) {
