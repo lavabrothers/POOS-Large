@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import {Grid, Typography, Button, Box, Grow} from '@mui/material'
+
+import React, { useState, useEffect } from 'react';
+import { Grid, Typography, Button, Box, Grow, TextField } from '@mui/material';
 import StockCard from './StockCard';
 
 function Home() {
@@ -8,6 +9,7 @@ function Home() {
   const [error, setError] = useState<string | null>(null);
   const [addingFavorite, setAddingFavorite] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Retrieve user data from localStorage
   let name: string = "";
@@ -22,17 +24,18 @@ function Home() {
     name = user.firstName;
   } else {
     window.location.href = '/';
-    return <Box></Box>
+    return <Box></Box>;
   }
 
   // Navigate to the Favorites page
   function goToFavorites(): void {
     window.location.href = '/favorites';
   }
+
   // Function to navigate to the stock's detail page
-  function goToStockInfoPage (stock: { symbol: string }) {
+  function goToStockInfoPage(stock: { symbol: string }) {
     window.location.href = `/stocks/${stock.symbol}`;
-  };
+  }
 
   // Fetch all stocks and the user's favorites, then filter out favorites from the list
   useEffect(() => {
@@ -79,6 +82,16 @@ function Home() {
     fetchData();
   }, [user._id]);
 
+  // Handler for search bar
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter stocks based on search query (case-insensitive)
+  const filteredStocks = stocks.filter(stock =>
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Function to add a stock to favorites
   const addFavorite = async (stock: { symbol: string; name?: string }) => {
     setAddingFavorite(true);
@@ -109,33 +122,53 @@ function Home() {
     }
   };
 
-
-
   if (loading) return <Box>Loading stocks...</Box>;
   if (error) return <Box>{error}</Box>;
 
   return (
-    <Box id="homeDiv" sx={{ padding: 2 }}>
-      <Typography sx={{textDecoration: 'underline'}} variant="h4">Welcome, {name}!</Typography>
-      <Button onClick={goToFavorites} variant="contained" sx={{ my: 2 }}>
+    <Box
+      id="homeDiv"
+      sx={{
+        padding: 2,
+        bgcolor: 'background.default', 
+        color: 'text.primary',         
+      }}
+    >
+      <Typography variant="h4">Welcome Home, {name}!</Typography>
+      <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2 }}>
         Favorites
       </Button>
       {addError && <Typography color="error">{addError}</Typography>}
+
+      <TextField
+        fullWidth
+        placeholder="Search stocks (Symbols)..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+        sx={{
+          mb: 2,
+          borderRadius: '50px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '50px',
+          },
+        }}
+      />
+
       <Grow in={!loading}>
         <Grid container spacing={2}>
-          {stocks.length > 0 ? (
-            stocks.map((stock) => (
+          {filteredStocks.length > 0 ? (
+            filteredStocks.map((stock) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stock.symbol}>
                 <StockCard
                   stock={stock}
                   onAddFavorite={addFavorite}
-                  onSymbolClick={goToStockInfoPage} // pass the symbol click handler
+                  onSymbolClick={goToStockInfoPage}
                 />
               </Grid>
             ))
           ) : (
-            <Grid size ={12}>
-              <Typography>No favorites added.</Typography>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Typography>No stocks match your search.</Typography>
             </Grid>
           )}
         </Grid>
@@ -145,3 +178,4 @@ function Home() {
 }
 
 export default Home;
+

@@ -6,9 +6,19 @@ const FavoritesPage = () =>
 {
 
     return(
+      <Box
+
+      sx={{
+        bgcolor: 'background.default', 
+        color: 'text.primary',         
+        minHeight: '100vh',
+        width: '100%',
+      }}
+    >
       <Box>
         <Logo />
         <Favorites />
+      </Box>
       </Box>
     );
 };
