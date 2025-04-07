@@ -1,48 +1,86 @@
-import { createTheme } from '@mui/material/styles';
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #121212; 
+  font-family: 'Inter', sans-serif;
+}
 
-const darkNeonTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#238691', // neon teal accent
-    },
-    secondary: {
-      main: '#ff6a3d', // neon orange accent
-    },
-    background: {
-      default: '#121212',
-      paper: '#1C1C1C',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#aaaaaa',
-    },
-  },
-  components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: '#262626',
-            '& fieldset': { borderColor: '#333' },
-            '&:hover fieldset': { borderColor: '#555' },
-            '&.Mui-focused fieldset': { borderColor: '#00ffcc' },
-          },
-          '& .MuiInputLabel-root': {
-            color: '#aaa',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          
-        },
-      },
-    },
-  },
-});
 
-export default darkNeonTheme;
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* stack children vertically */
+  justify-content: flex-start; /* align children at the top */
+  align-items: center;    /* center children horizontally */
+  padding: 2rem;
+  text-align: center;
+  background: transparent;
+  animation: fade-in 2s;
+}
+
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.titleHeader{
+  color:brown;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 100;
+  }
+}
+
+@keyframes gradientShift{
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
