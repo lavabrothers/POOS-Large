@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Button, Box, Grow, TextField } from '@mui/material';
+import { Grid, Typography,  Box, Grow, TextField } from '@mui/material';
 import StockCard from './StockCard';
 
 function Home() {
@@ -27,10 +27,7 @@ function Home() {
     return <Box></Box>;
   }
 
-  // Navigate to the Favorites page
-  function goToFavorites(): void {
-    window.location.href = '/favorites';
-  }
+
 
   // Function to navigate to the stock's detail page
   function goToStockInfoPage(stock: { symbol: string }) {
@@ -134,10 +131,7 @@ function Home() {
         color: 'text.primary',         
       }}
     >
-      <Typography variant="h4">Welcome Home, {name}!</Typography>
-      <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2 }}>
-        Favorites
-      </Button>
+      <Typography variant="h2">Welcome Home {name}!</Typography>
       {addError && <Typography color="error">{addError}</Typography>}
 
       <TextField
