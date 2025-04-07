@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Button } from '@mui/material';
 import Chart from 'react-apexcharts';
+import Chart_Earnings from './Chart_Earnings';
 
 interface Earnings {
   fiscalDateEnding: string;
@@ -61,7 +62,12 @@ const StockCard: React.FC<StockCardProps> = ({
     },
     xaxis: {
       categories: categories,
+<<<<<<< HEAD
       labels:{style:{colors: '#fff'}}
+=======
+      labels:{style:{colors: '#fff'}},
+      title: { text: 'Fiscal Date Ending', style: {color: '#fff',}},
+>>>>>>> 14080280dd0e59fb68b1a9d33bf3c124a6331546
     },
     yaxis: {
       title: { text: 'Reported EPS', style: {color: '#fff',}},
