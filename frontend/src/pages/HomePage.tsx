@@ -1,4 +1,3 @@
-import PageTitle from '../components/PageTitle';
 import Home from '../components/Home';
 import { Box } from '@mui/material';
 import Logo from '../components/Logo';
