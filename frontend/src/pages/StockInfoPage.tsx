@@ -1,5 +1,8 @@
 import StockInfo from '../components/StockInfo.tsx';
 import { useParams } from 'react-router-dom';
+import { Box } from '@mui/material';
+import Logo from '../components/Logo.tsx';
+
 
 
 function StockInfoPage() {
@@ -10,10 +13,10 @@ function StockInfoPage() {
   }
 
   return (
-    <div>
-      <h1>Stock Details</h1>
+    <Box>
+      <Logo />
       <StockInfo stockSymbol={symbol} />
-    </div>
+    </Box>
   );
 }
 
