@@ -11,6 +11,8 @@ const postmark = require("postmark");
 const postmarkClient = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN);
 const crypto = require('crypto');
 const StockInfo = require('./models/StockInfo');
+const NewsTickerCache = require('./models/NewsTickerCache'); //for caching news ticker
+
 
 // Connect to MongoDB
 //console.log("MONGO_URI:", process.env.MONGO_URI); 
@@ -618,7 +620,6 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
-// New API endpoint for the news ticker
 app.get('/api/newsticker', async (req, res) => {
   try {
     const newsApiKey = process.env.NEWS_API_KEY;
@@ -626,7 +627,17 @@ app.get('/api/newsticker', async (req, res) => {
       return res.status(500).json({ error: "News API key not configured." });
     }
     
-    // Call the third-party news API using axios
+    //checks if the cache exists and is newer than 24 hours 
+    const cacheEntry = await NewsTickerCache.findOne({});
+    const now = new Date();
+    const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    if (cacheEntry && (now - cacheEntry.updatedAt < twentyFourHours)) {
+      console.log('Returning cached news ticker data');
+      return res.json({ status: "ok", articles: cacheEntry.articles });
+    }
+
+    //cache is stale, fetch new data
     const response = await axios.get('https://newsapi.org/v2/top-headlines', {
       params: {
         country: 'us',
@@ -636,20 +647,29 @@ app.get('/api/newsticker', async (req, res) => {
     });
 
     if (response.data.status === "ok") {
-      // Map the articles to just the title and URL fields
       const headlines = response.data.articles.map(article => ({
         title: article.title,
         url: article.url
       }));
-      res.json({ status: "ok", articles: headlines });
+
+      //add the new data
+      await NewsTickerCache.findOneAndUpdate(
+        {}, 
+        { articles: headlines, updatedAt: new Date() },
+        { upsert: true, new: true }
+      );
+
+      console.log('Fetched new data from the API and updated cache.');
+      return res.json({ status: "ok", articles: headlines });
     } else {
-      res.status(500).json({ error: "Error fetching headlines", details: response.data });
+      return res.status(500).json({ error: "Error fetching headlines", details: response.data });
     }
   } catch (error) {
     console.error("Error fetching news:", error);
-    res.status(500).json({ error: "Error fetching news", details: error.message });
+    return res.status(500).json({ error: "Error fetching news", details: error.message });
   }
 });
+
 
 // 4Start the server
 app.listen(PORT, '0.0.0.0', () => {
