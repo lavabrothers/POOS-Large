@@ -63,6 +63,11 @@ function Home() {
         // Filter out stocks that are already favorited
         const filteredStocks = stocksData.filter((stock: { symbol: string }) => !favoriteSymbols.has(stock.symbol));
         setStocks(filteredStocks);
+        for (const st of filteredStocks) {
+          const response = await fetch(`http://134.122.3.46:3000/api/stockInfo?ticker=${st.symbol}`)
+          var res = JSON.parse(await response.text())
+          st.name = res['short name']
+        }
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError("Error fetching stocks");
