@@ -83,7 +83,7 @@ const NewsTicker = () => {
         ) : (
           <div style={{
             display: 'inline-block',
-            animation: 'scroll-left 400s linear infinite'
+            animation: 'scroll-left 30s linear infinite'
           }}>
             {renderHeadlines("original")}
             {renderHeadlines("duplicate")}
