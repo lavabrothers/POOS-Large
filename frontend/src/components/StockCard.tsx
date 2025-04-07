@@ -64,6 +64,7 @@ const StockCard: React.FC<StockCardProps> = ({
       categories: categories,
       labels:{style:{colors: '#fff'}},
       title: { text: 'Fiscal Date Ending', style: {color: '#fff',}},
+
     },
     yaxis: {
       title: { text: 'Reported EPS', style: {color: '#fff',}},
@@ -72,7 +73,10 @@ const StockCard: React.FC<StockCardProps> = ({
     stroke: {
       curve: "smooth" as "smooth"
     },
-    dataLabels: { enabled: false }
+    dataLabels: { enabled: false },
+    tooltip: {
+      theme: 'dark',
+    }
   };
 
   const series = [
@@ -117,9 +121,10 @@ const StockCard: React.FC<StockCardProps> = ({
           <Button
             onClick={() => onRemoveFavorite(stock)}
             variant="contained"
+            color="secondary"
             sx={{ mt: 2 }}
           >
-            Remove from Favorites
+            Remove Favorite
           </Button>
         )}
       </CardContent>

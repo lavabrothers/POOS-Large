@@ -9,7 +9,8 @@ const HomePage = () => {
 
       sx={{
         bgcolor: 'background.default', // uses dark theme background
-        color: 'text.primary',         // uses dark theme text color
+        color: 'text.primary',  
+        // uses dark theme text color
         minHeight: '100vh',
         width: '100%',
       }}

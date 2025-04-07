@@ -6,14 +6,25 @@ import Logo from '../components/Logo.tsx';
 
 
 function StockInfoPage() {
+  
   const { symbol } = useParams<{ symbol: string }>();
+
+  
 
   if (!symbol) {
     return <div>No stock symbol provided.</div>;
   }
 
   return (
-    <Box>
+  <Box
+
+    sx={{
+      bgcolor: 'background.default', // uses dark theme background
+      color: 'text.primary',         // uses dark theme text color
+      minHeight: '100vh',
+      width: '100%',
+    }}
+  >
       <Logo />
       <StockInfo stockSymbol={symbol} />
     </Box>
