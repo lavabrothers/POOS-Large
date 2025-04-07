@@ -1,23 +1,27 @@
-import PageTitle from '../components/PageTitle';
-import Home from '../components/Home';
+import React from 'react';
 import { Box } from '@mui/material';
-import Logo from '../components/Logo';
+import Lottie from 'lottie-react';
+import PageTitle from '../components/PageTitle';
+import Login from '../components/Login';
+import graphAnimation from '../assets/graph_animation.json';
 
-const HomePage = () => {
+const LoginPage = () => {
   return (
-    <Box
-
-      sx={{
-        bgcolor: 'background.default', // uses dark theme background
-        color: 'text.primary',         // uses dark theme text color
-        minHeight: '100vh',
-        width: '100%',
-      }}
+    <Box 
+      display="flex" 
+      flexDirection="column" 
+      alignItems="center" 
+      justifyContent="center" 
+      minHeight="100vh" 
+      sx={{ bgcolor: 'background.default', color: 'text.primary' }}
     >
-      <Logo />
-      <Home />
+      <Box display="flex" flexDirection="row" alignItems="flex-start" justifyContent="center" gap={4}>
+        <Lottie animationData={graphAnimation} style={{ height: 170 }} />
+        <PageTitle />
+        <Login />
+      </Box>
     </Box>
   );
 };
 
-export default HomePage;
+export default LoginPage;
