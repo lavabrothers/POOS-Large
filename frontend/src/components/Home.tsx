@@ -10,6 +10,7 @@ function Home() {
   const [addingFavorite, setAddingFavorite] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [newStockStatus, setNewStockStatus] = useState<number | null>(null)
 
   // Retrieve user data from localStorage
   let name: string = "";
@@ -35,6 +36,14 @@ function Home() {
   // Function to navigate to the stock's detail page
   function goToStockInfoPage(stock: { symbol: string }) {
     window.location.href = `/stocks/${stock.symbol}`;
+  }
+
+  // Add a stock to the database
+  async function addNew() : Promise<void> {
+    const response = await fetch(`http://134.122.3.46:3000/api/stocks/${searchQuery}`)
+    setNewStockStatus(response.status)
+    if(response.status == 200) setSearchQuery(searchQuery) // updates search results
+    else setNewStockStatus(response.status)
   }
 
   // Fetch all stocks and the user's favorites, then filter out favorites from the list
@@ -85,6 +94,7 @@ function Home() {
   // Handler for search bar
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setNewStockStatus(null)
   };
 
   // Filter stocks based on search query (case-insensitive)
@@ -168,9 +178,16 @@ function Home() {
             ))
           ) : (
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography>No stocks match your search.</Typography>
+              <Button onClick={addNew} variant="contained"  sx={{ my: 2 }}>
+                Stock not found on file. Click here to add.
+              </Button>
             </Grid>
           )}
+          {newStockStatus == 429 ? (
+            <Typography>Stock could not be added. AlphaVantage API limit reached.</Typography>
+          ) : newStockStatus == 404 ? (
+            <Typography>Stock could not be added. Requested symbol could not be found.</Typography>
+          ) : <></>}
         </Grid>
       </Grow>
     </Box>
