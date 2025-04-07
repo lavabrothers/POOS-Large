@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-// Split the API key into two parts to prevent bots from scraping cause im too lazy to make an enviornment variable
-const API_KEY_PART1 = "c740dac6a061445ea31";
-const API_KEY_PART2 = "afa052417f0e2";
-const API_KEY = API_KEY_PART1 + API_KEY_PART2;
+interface Headline {
+  title: string;
+  url: string;
+}
 
-const NewsTicker = () => {
-  const [headlines, setHeadlines] = useState<{ title: string; url: string }[]>([]);
+const NewsTicker: React.FC = () => {
+  const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const tickerRef = useRef<HTMLDivElement | null>(null);
+  const [animationDuration, setAnimationDuration] = useState<number>(60); //default duration, the non-default is calculated based on device width
 
   useEffect(() => {
-    fetch(`https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${API_KEY}`)
+    fetch('http://134.122.3.46:3000/api/newsticker')
       .then(response => response.json())
       .then(data => {
-        if (data.status === "ok") {
-          const news = data.articles.map((article: any) => ({
+        if (data.status === "ok" && data.articles && Array.isArray(data.articles)) {
+          const news: Headline[] = data.articles.map((article: any) => ({
             title: article.title,
-            url: article.url
+            url: article.url,
           }));
           setHeadlines(news);
         } else {
@@ -29,9 +31,18 @@ const NewsTicker = () => {
       });
   }, []);
 
-  const renderHeadlines = (prefix: string) => (
+  useEffect(() => {
+    if (tickerRef.current) {
+      const contentWidth = tickerRef.current.offsetWidth; //calculating scroll speed based on device width
+      const speed = 50;
+      const duration = (contentWidth / 2) / speed;
+      setAnimationDuration(duration);
+    }
+  }, [headlines]);
+
+  const renderHeadlines = () => (
     headlines.map((news, index) => (
-      <React.Fragment key={`${prefix}-${index}`}>
+      <React.Fragment key={index}>
         <a
           href={news.url}
           target="_blank"
@@ -39,19 +50,22 @@ const NewsTicker = () => {
           style={{
             marginRight: '20px',
             textDecoration: 'none',
-            color: 'black'
+            color: 'black',
+            whiteSpace: 'nowrap'
           }}
         >
           {news.title}
         </a>
         {index < headlines.length - 1 && (
-          <span style={{
-            display: 'inline-block',
-            marginRight: '20px',
-            borderLeft: '1px solid black',
-            height: '1em',
-            verticalAlign: 'middle'
-          }} />
+          <span
+            style={{
+              display: 'inline-block',
+              margin: '0 20px',
+              borderLeft: '1px solid black',
+              height: '1em',
+              verticalAlign: 'middle'
+            }}
+          />
         )}
       </React.Fragment>
     ))
@@ -64,14 +78,12 @@ const NewsTicker = () => {
       left: 0,
       width: '100%',
       backgroundColor: '#f5f5f5',
-      padding: '5px 10px',
+      padding: '2px 15px',
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
-      flexWrap: 'nowrap',
       border: '5px solid red',
       fontFamily: "'Oswald', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-      animation: 'flash-border 2s infinite'
     }}>
       <div style={{
         flexShrink: 0,
@@ -86,20 +98,23 @@ const NewsTicker = () => {
         {error ? (
           <span style={{ color: 'red' }}>{error}</span>
         ) : (
-          <div style={{
-            display: 'inline-block',
-            animation: 'scroll-left 200s linear infinite'
-          }}>
-            {renderHeadlines("original")}
-            {renderHeadlines("duplicate")}
+          <div
+            ref={tickerRef}
+            style={{
+              display: 'inline-block',
+              animation: headlines.length > 0 ? `scroll-left ${animationDuration}s linear infinite` : 'none'
+            }}
+          >
+            <span style={{ display: 'inline-block' }}>{renderHeadlines()}</span>
+            <span style={{ display: 'inline-block' }}>{renderHeadlines()}</span>
           </div>
         )}
       </div>
       <style>
         {`
           @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
           @keyframes flash-border {
             0% { border-color: red; }

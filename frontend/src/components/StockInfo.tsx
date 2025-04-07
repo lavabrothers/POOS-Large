@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
-import Chart from 'react-apexcharts';
-import { Box, Button, Typography, Grid } from '@mui/material';
+import { Box, Typography, Grid,} from '@mui/material';
+import Chart_Earnings from './Chart_Earnings';
+import Chart_BalanceSheet, { BalanceSheetEntry } from './Chart_BalanceSheet';
+import Chart_Dividends from './Chart_Dividends';
+import Chart_IncomeStatements from './Chart_IncomeStatements';
+import Chart_CashFlow from './Chart_CashFlow';
+
 
 
 interface StockData {
@@ -26,10 +31,6 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   } else {
     window.location.href = '/';
     return <div></div>;
-  }
-
-  function goToHome() {
-    window.location.href = '/home';
   }
 
   const [loading, setLoading] = useState(true);
@@ -89,36 +90,7 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   const earningsDates = sortedEarnings.map(item => item.fiscalDateEnding);
   const earningsValues = sortedEarnings.map(item => parseFloat(item.reportedEPS));
 
-  // ----- Balance Sheet Pie Chart Breakdown -----
-  const parseValue = (val: any) => (val && val !== "None" ? Number(val) : 0);
-  const cash = parseValue((latestBalanceSheet as any).cashAndShortTermInvestments);
-  const inventory = parseValue((latestBalanceSheet as any).inventory);
-  const ppe = parseValue((latestBalanceSheet as any).propertyPlantEquipment);
-  const longTermInv = parseValue((latestBalanceSheet as any).longTermInvestments);
-  const goodwill = parseValue((latestBalanceSheet as any).goodwill);
-  const intangible = parseValue((latestBalanceSheet as any).intangibleAssets);
-  const totalAssets = parseValue(latestBalanceSheet.totalAssets);
-  const usedAssets = cash + inventory + ppe + longTermInv + goodwill + intangible;
-  const otherAssets = Math.max(totalAssets - usedAssets, 0);
 
-  const balanceSheetLabels = [
-    "Cash & Short-Term",
-    "Inventory",
-    "PPE",
-    "Long-Term Inv.",
-    "Goodwill",
-    "Intangible",
-    "Other Assets"
-  ];
-  const balanceSheetValues = [
-    cash,
-    inventory,
-    ppe,
-    longTermInv,
-    goodwill,
-    intangible,
-    otherAssets
-  ];
 
   // ----- Cash Flow Double Bar Chart Breakdown -----
   // We assume your cash flow object now includes additional fields for a breakdown:
@@ -131,97 +103,40 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   const financingCFValues = sortedCashFlows.map(item => parseValue2((item as any).cashflowFromFinancing));
 
   return (
-    <Box id="stockinfoDiv" sx={{ padding: 2 }}>
+    <Box
+    id="stockinfoDiv"
+    sx={{ padding: 2, bgcolor: 'background.default', color: 'text.primary' }}
+
+    >
       <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
-      {/* Top Row: Balance Sheet and Earnings */}
+{/*-----------------Top Row: Balance Sheet and Earnings----------------------*/}
+      {/* Balance Sheet  */}
       <Grid container spacing={2} sx={{ mt: 10 }}>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="h5">Balance Sheet Breakdown (Total Assets)</Typography>
-          <Chart 
-            options={{
-              labels: balanceSheetLabels,
-              dataLabels: { enabled: true },
-              legend: { position: 'bottom' },
-              tooltip: { y: { formatter: (val: number) => `${val}` } }
-            }}
-            series={balanceSheetValues}
-            type="pie"
-            width={500}
-            height={300}
-            />
+         <Chart_BalanceSheet balanceSheet={latestBalanceSheet as BalanceSheetEntry} />
         </Grid>
 
+      {/* Earnings */}
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="h5">Earnings (Reported EPS)</Typography>
-          <Chart 
-            options={{
-              chart: { id: 'earnings' },
-              xaxis: { categories: earningsDates, title: { text: 'Fiscal Date Ending' } },
-              yaxis: { title: { text: 'Reported EPS' } },
-              dataLabels: { enabled: false },
-              stroke: { curve: 'smooth' }
-            }}
-            series={[{ name: 'Reported EPS', data: earningsValues }]}
-            type="line"
-            width={1000}
-            height={300}
-          />
+          <Chart_Earnings dates={earningsDates} values={earningsValues} />
         </Grid>
       </Grid>
 
-      {/* Bottom Row: Dividends, Income Statement, and Cash Flow */}
+{/*----------------Bottom Row: Dividends, Income Statement, and Cash Flow---------------*/}
       <Grid container spacing={2} sx={{ mt: 2 }}>
+        {/* Dividends */}
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="h5">Dividends</Typography>
-          <Chart 
-            options={{
-              chart: { id: 'dividends' },
-              xaxis: { categories: dividendDates, title: { text: 'Date' } },
-              yaxis: { title: { text: 'Dividend' } },
-              dataLabels: { enabled: false },
-              plotOptions: { bar: { horizontal: false, columnWidth: '55%' } }
-            }}
-            series={[{ name: 'Dividend', data: dividendValues }]}
-            type="bar"
-            width={500}
-            height={300}
-          />
+         <Chart_Dividends dates={dividendDates} values={dividendValues} />
         </Grid>
+
+        {/* Income Statement */}
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="h5">Income Statement (Net Income)</Typography>
-          <Chart 
-            options={{
-              chart: { id: 'income-statement' },
-              xaxis: { categories: incomeDates, title: { text: 'Fiscal Date Ending' } },
-              yaxis: { title: { text: 'Net Income' } },
-              dataLabels: { enabled: false },
-              stroke: { curve: 'smooth' }
-            }}
-            series={[{ name: 'Net Income', data: incomeValues }]}
-            type="line"
-            width={500}
-            height={300}
-          />
+         <Chart_IncomeStatements dates={incomeDates} values={incomeValues} />
         </Grid>
+
+        {/* Cash Flow */}
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="h5">Cash Flow (Operating vs. Financing)</Typography>
-          <Chart 
-            options={{
-              chart: { id: 'cash-flow-bar', zoom: { enabled: true, type: 'x' }, toolbar: { show: true, autoSelected: 'zoom' } },
-              xaxis: { categories: cashFlowDates, title: { text: 'Fiscal Date Ending' } },
-              yaxis: { title: { text: 'Cash Flow' } },
-              dataLabels: { enabled: false },
-              plotOptions: { bar: { horizontal: false, columnWidth: '55%' } },
-              legend: { position: 'bottom' },
-              colors: ['#007bff', '#ff0000']
-            }}
-            series={[
-              { name: 'Operating Cash Flow', data: operatingCFValues },
-              { name: 'Financing Cash Flow', data: financingCFValues }
-            ]}
-            type="bar"
-            width={500}
-            height={300}
+        <Chart_CashFlow dates={cashFlowDates} operatingCF={operatingCFValues}  financingCF={financingCFValues} 
           />
         </Grid>
       </Grid>
