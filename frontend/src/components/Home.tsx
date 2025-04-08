@@ -42,7 +42,15 @@ function Home() {
   async function addNew() : Promise<void> {
     const response = await fetch(`http://134.122.3.46:3000/api/stocks/${searchQuery}`)
     setNewStockStatus(response.status)
-    if(response.status == 200) setSearchQuery(searchQuery) // updates search results
+    if(response.status == 200) {
+      const response = await fetch(`http://134.122.3.46:3000/api/stockInfo?ticker=${searchQuery}`)
+      var res = JSON.parse(await response.text())
+      var newStocks = stocks
+      newStocks.push({symbol : searchQuery, name : res['short name']})
+      setStocks(newStocks);
+      setSearchQuery('');
+      window.location.reload();
+    }
     else setNewStockStatus(response.status)
   }
 
@@ -182,18 +190,21 @@ function Home() {
               </Grid>
             ))
           ) : (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <Button onClick={addNew} variant="contained"  sx={{ my: 2 }}>
-                Stock not found on file. Click here to add.
-              </Button>
-            </Grid>
+            <Typography>Stock not found.</Typography>
           )}
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Button onClick={addNew} variant="contained"  sx={{ my: 2 }}>
+              Stock not found? Click here to add.
+            </Button>
+          </Grid>
           {newStockStatus == 429 ? (
             <Typography>Stock could not be added. AlphaVantage API limit reached.</Typography>
           ) : newStockStatus == 404 ? (
             <Typography>Stock could not be added. Requested symbol could not be found.</Typography>
           ) : <></>}
+          
         </Grid>
+        
       </Grow>
     </Box>
   );
