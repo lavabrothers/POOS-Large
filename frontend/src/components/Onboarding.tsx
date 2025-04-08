@@ -1,3 +1,4 @@
+// src/components/Onboarding.tsx
 import React, { useState } from 'react';
 import {
   Box,
@@ -11,39 +12,39 @@ import alterFav from './alterfav.tsx';
 import { ToastContainer, toast, Bounce} from 'react-toastify';
 
 function Onboarding() {
-  // Retrieve user data from localStorage
-  const userString = localStorage.getItem('user_data');
+  const [logo, setLogo] = useState('question');
+  const [input, setInput] = useState('');
+  const [message, setMessage] = useState('');
+
+  const userstring = localStorage.getItem('user_data');
   let user: any;
   let name = "";
-  if (userString && userString !== "") {
-    user = JSON.parse(userString);
+  if (userstring && userstring !== "") {
+    user = JSON.parse(userstring);
     name = user.firstName;
   } else {
     window.location.href = '/';
     return <div></div>;
   }
 
-  const [logo, setLogo] = useState('question');
-  const [input, setInput] = useState('');
-  const [message, setMessage] = useState('');
-
-  // Update input; if matching a stock, update logo accordingly
+  // Use a TextField with native select (or consider MUI's Autocomplete) so that the style matches the rest of your app
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setInput(val);
+    const value = e.target.value;
+    setInput(value);
+    // Determine which logo to show based on the selected value
     let symbol = 'question';
     for (let i = 0; i < stocks.length; i++) {
-      if (val === `${stocks[i].symbol} (${stocks[i].name})`) {
+      if (value === `${stocks[i].symbol} (${stocks[i].name})`) {
         symbol = stocks[i].symbol;
         break;
       }
     }
     setLogo(symbol);
-    console.log('Logo set to:', symbol);
+    console.log('logos/' + symbol + '.jpg');
   };
 
-  const addFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const addFavorite = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     let symbol = '';
     let stockName = '';
     for (let i = 0; i < stocks.length; i++) {
@@ -69,22 +70,39 @@ function Onboarding() {
     setInput('');
   };
 
-  const goToHome = () => {
-    window.location.href = '/home';
-  };
+  const notify = () => toast('Onboarding complete! Redirecting to login...', {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Bounce,
+    onClose: goToLogin
+    });
+
+    function notifyFinished() : void {
+        notify();
+    }
+
+    function goToLogin() : void {
+        window.location.href = '/'
+    }
 
   return (
     <Box
       id="onboardingDiv"
       sx={{
-        bgcolor: 'background.default', // Uses dark theme background
-        color: 'text.primary',         // Uses theme text color
+        bgcolor: 'background.default', // Use dark theme background
+        color: 'text.primary',         // Use dark theme text color
         p: 4,
         borderRadius: 2,
-        width: { xs: '90%', sm: 500 },
+        width: { xs: '90%', sm: '400px' },
         mx: 'auto',
         mt: 4,
-        textAlign: 'center',
+        textAlign: 'center'
       }}
     >
       <Typography variant="h4" sx={{ mb: 2 }}>
@@ -94,27 +112,28 @@ function Onboarding() {
         Tell us about what stocks you're interested in so we can add them to your dashboard!
       </Typography>
 
-      {/* Use a TextField with a select menu */}
+      {/* Instead of using plain HTML, use a Material-UI TextField for consistent styling */}
       <TextField
+        fullWidth
         select
-        label="Select Stock"
+        label="Select a Stock"
         value={input}
         onChange={handleInputChange}
+        SelectProps={{
+          native: true,
+        }}
         variant="outlined"
-        fullWidth
         sx={{ mb: 2, borderRadius: '50px' }}
       >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
-        {stocks.map((d) => (
-          <MenuItem key={d.symbol} value={`${d.symbol} (${d.name})`}>
+        <option value=""></option>
+        {stocks.map((d, index) => (
+          <option key={index} value={`${d.symbol} (${d.name})`}>
             {`${d.symbol} (${d.name})`}
-          </MenuItem>
+          </option>
         ))}
       </TextField>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
         <Button variant="contained" onClick={addFavorite}>
           Add
         </Button>
@@ -123,43 +142,21 @@ function Onboarding() {
         </Button>
       </Box>
 
-    const notify = () => toast('Onboarding complete! Redirecting to login...', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-        onClose: goToLogin
-        });
-
-        function notifyFinished() : void {
-            notify();
-        }
-
-        function goToLogin() : void {
-            window.location.href = '/'
-        }
-    return (
-        <div id="onboardingDiv">
-            <span id="inner-title">WELCOME TO FINANCIAL STATS, {name.toUpperCase()}!</span><br/>
-            <span id="description">Tell us about what stocks you're interested in so we can add them to your dashboard!</span><br/><br/>
-            
-            <input list="stocks" name="stock" id="stock" value={input} onChange={changelogo} />
-            <datalist id="stocks">
-                { stocks.map( d => <option value = {d.symbol + ' (' + d.name + ')'} /> ) }
-            </datalist>
-            <input type="submit" value = 'Add' onClick={addFavorite}/>
-            <input type="button" value = 'Clear' onClick={clearInput}></input><br/><br/>
-            <img src={'logos/' + logo + '.jpg'} alt="Desc" width="64" height="64"></img><br/>
-            <span id='message'>{message}</span><br/><br/>
-            <button type="button" onClick={notifyFinished}>Proceed</button>
+      <Box sx={{ mb: 2 }}>
+        <img
+          src={`logos/${logo}.jpg`}
+          alt="Logo"
+          width="64"
+          height="64"
+        />
+      </Box>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        {message}
+      </Typography>
+      <button type="button" onClick={notifyFinished}>Proceed</button>
             <ToastContainer />
-        </div>
-    )
+    </Box>
+  );
 }
 
 export default Onboarding;
