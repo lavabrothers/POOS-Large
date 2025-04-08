@@ -1,11 +1,11 @@
 // Uses UnitTester user with id 67ec9ea0b4d17f170bd40839 to test functions
 
-
+const unitTestId = '67f45f9a2e06a650c83d00b4'
 
 describe("Testing create favorites: ", function () {
     it('Should not create a list for a user that already has one', async function () {
-
-        var js = JSON.stringify({ userId : '67ec9ea0b4d17f170bd40839', stocks : ''})
+        
+        var js = JSON.stringify({ userId : unitTestId, stocks : ''})
         const response = await fetch('http://134.122.3.46:3000/api/favorites/create', {
             method:'POST',
             body: js,
@@ -39,7 +39,7 @@ async function requsetRemove(js) {
 describe('Testing Add/Remove Favorites API: ', function () {
     it('Should successfully remove, add, and then remove AAPL from UnitTester', async function () {
         var remjs = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL'
         })
 
@@ -49,7 +49,7 @@ describe('Testing Add/Remove Favorites API: ', function () {
         expect(res.message).not.toBe(403)
 
         var remjs = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL',
             stockName: 'Apple'
         })
@@ -60,7 +60,7 @@ describe('Testing Add/Remove Favorites API: ', function () {
         expect(status).toBe(200)
 
         var remjs = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL'
         })
 
@@ -97,7 +97,7 @@ describe('Testing Add/Remove Favorites API: ', function () {
 
     it("Removes AAPL from UnitTester twice, should recognize that stock isn't there", async function () {
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL'
         })
 
@@ -114,7 +114,7 @@ describe('Testing Add/Remove Favorites API: ', function () {
 
     it("Adds AAPL to UnitTester twice then removes it. Should recognize that stock is already there", async function () {
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL',
             stockName: 'Apple'
         })
@@ -130,7 +130,7 @@ describe('Testing Add/Remove Favorites API: ', function () {
         expect(status).toBe(400)
 
         var remjs = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AAPL'
         })
 
@@ -142,14 +142,14 @@ describe('Testing Add/Remove Favorites API: ', function () {
 })
 
 async function requestSearchAll() {
-    const response = await fetch(`http://134.122.3.46:3000/api/favorites/search?userId=67ec9ea0b4d17f170bd40839`);
+    const response = await fetch(`http://134.122.3.46:3000/api/favorites/search?userId=${unitTestId}`);
     return { res: JSON.parse(await response.text()), status: response.status };
 }
 
 describe("Testing favorites search API: ", function () {
     it('Adds NFLX, AMZN, and TSLA. Should search for all with one API call. Removes all afterward.', async function () {
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'NFLX',
             stockName: 'Netflix'
         })
@@ -160,7 +160,7 @@ describe("Testing favorites search API: ", function () {
         expect(status).toBe(200)
 
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AMZN',
             stockName: 'Amazon'
         })
@@ -171,7 +171,7 @@ describe("Testing favorites search API: ", function () {
         expect(status).toBe(200)
 
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'TSLA',
             stockName: 'Tesla'
         })
@@ -194,7 +194,7 @@ describe("Testing favorites search API: ", function () {
         expect(status).toBe(200)
 
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'NFLX'
         })
 
@@ -204,7 +204,7 @@ describe("Testing favorites search API: ", function () {
         expect(status).toBe(200)
 
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'TSLA'
         })
 
@@ -214,7 +214,7 @@ describe("Testing favorites search API: ", function () {
         expect(status).toBe(200)
 
         var js = JSON.stringify({
-            userId: '67ec9ea0b4d17f170bd40839',
+            userId: unitTestId,
             symbol: 'AMZN'
         })
 
