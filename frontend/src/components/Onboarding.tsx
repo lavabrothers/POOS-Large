@@ -5,7 +5,7 @@ import {
   Typography,
   TextField,
   Button,
-  MenuItem,
+  //MenuItem,
 } from '@mui/material';
 import stocks from './stocklist.tsx';
 import alterFav from './alterfav.tsx';
