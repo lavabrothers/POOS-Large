@@ -48,7 +48,7 @@ function Home() {
       var newStocks = stocks
       newStocks.push({symbol : searchQuery, name : res['short name']})
       setStocks(newStocks);
-      setSearchQuery('');
+      
       window.location.reload();
     }
     else setNewStockStatus(response.status)
