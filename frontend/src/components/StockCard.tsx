@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Button } from '@mui/material';
 import Chart from 'react-apexcharts';
+import Chart_Earnings from './Chart_Earnings';
 
 interface Earnings {
   fiscalDateEnding: string;
@@ -61,15 +62,21 @@ const StockCard: React.FC<StockCardProps> = ({
     },
     xaxis: {
       categories: categories,
-      title: { text: 'Fiscal Date Ending' }
+      labels:{style:{colors: '#fff'}},
+      title: { text: 'Fiscal Date Ending', style: {color: '#fff',}},
+
     },
     yaxis: {
-      title: { text: 'Reported EPS' }
+      title: { text: 'Reported EPS', style: {color: '#fff',}},
+      labels:{style:{colors: '#fff'}}
     },
     stroke: {
       curve: "smooth" as "smooth"
     },
-    dataLabels: { enabled: false }
+    dataLabels: { enabled: false },
+    tooltip: {
+      theme: 'dark',
+    }
   };
 
   const series = [
@@ -114,9 +121,10 @@ const StockCard: React.FC<StockCardProps> = ({
           <Button
             onClick={() => onRemoveFavorite(stock)}
             variant="contained"
+            color="secondary"
             sx={{ mt: 2 }}
           >
-            Remove from Favorites
+            Remove Favorite
           </Button>
         )}
       </CardContent>

@@ -138,13 +138,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Hello Again, ${name.toUpperCase()}!',
-                style: Theme.of(context).textTheme.titleLarge),
+            // Text('Hello Again, ${name.toUpperCase()}!',
+            //     style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: goHome,
-              child: const Text('Home'),
-            ),
+            // ElevatedButton(
+            //   onPressed: goHome,
+            //   child: const Text('Home'),
+            // ),
             const SizedBox(height: 16),
             Expanded(
               child: currentFavorites.isNotEmpty

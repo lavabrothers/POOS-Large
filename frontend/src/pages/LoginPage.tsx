@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import Lottie from 'lottie-react';
 import PageTitle from '../components/PageTitle';

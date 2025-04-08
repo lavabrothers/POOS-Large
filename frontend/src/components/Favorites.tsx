@@ -95,7 +95,7 @@ function Favorites() {
         color: 'text.primary',
       }}
     >
-      <Typography variant="h6">Hello Again, {name}!</Typography>
+      <Typography variant="h2">{name}'s Favorites</Typography>
       
       <TextField
         fullWidth
