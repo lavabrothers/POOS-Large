@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography,  Box, Grow, TextField } from '@mui/material';
+import { Grid, Typography,  Box, Grow, TextField, Button } from '@mui/material';
 import StockCard from './StockCard';
 
 function Home() {
@@ -27,8 +27,6 @@ function Home() {
     window.location.href = '/';
     return <Box></Box>;
   }
-
-
 
   // Function to navigate to the stock's detail page
   function goToStockInfoPage(stock: { symbol: string }) {
@@ -158,9 +156,6 @@ function Home() {
       <Typography variant="h4">Welcome Home, {name}!</Typography>
       <Button onClick={signOut} variant="contained"  sx={{ my: 2 }}>
         Sign Out
-      </Button>
-      <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2 }}>
-        Favorites
       </Button>
       
       {addError && <Typography color="error">{addError}</Typography>}
