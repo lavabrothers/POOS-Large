@@ -161,6 +161,9 @@ function Home() {
       <Button onClick={signOut} variant="contained"  sx={{ my: 2 }}>
         Sign Out
       </Button>
+      <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2 }}>
+        Favorites
+      </Button>
       {addError && <Typography color="error">{addError}</Typography>}
 
       <TextField
