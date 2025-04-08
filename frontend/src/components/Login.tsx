@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, TextField, Typography, Modal, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
@@ -12,9 +12,9 @@ function Login() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function handleSend() {
+  /*function handleSend() {
     setLoading(true);
-  }
+  }*/
 
   const handleForgotPasswordEmail = (e: any): void => {
     setForgotPasswordEmail(e.target.value);
