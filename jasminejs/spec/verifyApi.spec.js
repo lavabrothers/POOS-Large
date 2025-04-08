@@ -28,7 +28,7 @@ describe("Tests verification email generation API: ", function () {
 
 describe('Tests reset-password API: ', function () {
     it('Should return a password reset form', async function () {
-        const response = await fetch("http://134.122.3.46:3000/api/reset-password?token=a91a73550620327af9769e1bfd9ff60435ee26bf")
+        const response = await fetch("http://134.122.3.46:3000/api/reset-password?token=dccef51aafaea31bbb5599da3c2310b0cc7d4888")
         expect(response.status).toBe(200)
         expect(await response.text()).toBe(`
     <!DOCTYPE html>
@@ -45,7 +45,7 @@ describe('Tests reset-password API: ', function () {
     <body>
       <h1>Reset Your Password</h1>
       <form id="resetForm">
-        <input type="hidden" name="token" value="a91a73550620327af9769e1bfd9ff60435ee26bf" />
+        <input type="hidden" name="token" value="dccef51aafaea31bbb5599da3c2310b0cc7d4888" />
         <div>
           <input type="password" name="newPassword" placeholder="New Password" required />
         </div>
