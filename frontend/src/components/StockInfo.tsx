@@ -105,19 +105,24 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   return (
     <Box
     id="stockinfoDiv"
-    sx={{ padding: 2, bgcolor: 'background.default', color: 'text.primary' }}
+    sx={{ 
+      padding: 2, 
+      bgcolor: 'background.paper', 
+      color: 'text.primary',
+      minwidth: '100%', 
+      minHeight: '100vh'  }}
 
     >
       <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
 {/*-----------------Top Row: Balance Sheet and Earnings----------------------*/}
       {/* Balance Sheet  */}
-      <Grid container spacing={2} sx={{ mt: 10 }}>
+      <Grid container spacing={0.5} sx={{ mt: 10 }}>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
          <Chart_BalanceSheet balanceSheet={latestBalanceSheet as BalanceSheetEntry} />
         </Grid>
 
       {/* Earnings */}
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid size={{ xs: 24, sm: 6, md: 7 }}>
           <Chart_Earnings dates={earningsDates} values={earningsValues} />
         </Grid>
       </Grid>

@@ -25,7 +25,20 @@ function Chart_CashFlow({ dates, operatingCF, financingCF}: CashFlowChartProps):
                 id: 'cash-flow-bar', 
                 type:'bar',
                 zoom: { enabled: true, type: 'x' }, 
-                toolbar: { show: true, autoSelected: 'zoom' } },
+                toolbar: {
+                  show: true,
+                  autoSelected: 'zoom',
+                  tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                    reset: true
+                  }
+                }
+               },
               xaxis: { 
                 type:'datetime',
                 categories: dates, 
@@ -52,8 +65,8 @@ function Chart_CashFlow({ dates, operatingCF, financingCF}: CashFlowChartProps):
               { name: 'Financing Cash Flow', data: financingCF}
             ]}
             type="bar"
-            width={500}
-            height={300}
+           minwidth="100%"
+           minheight="100%"
           />
   </>
   );
