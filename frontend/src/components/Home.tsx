@@ -149,7 +149,7 @@ function Home() {
       }}
     >
 
-      <Typography variant="h4">Welcome Home, {name}!</Typography>
+      <Typography variant="h4">Welcome Home, {name}!</Typography><br/>
       
       {addError && <Typography color="error">{addError}</Typography>}
 
