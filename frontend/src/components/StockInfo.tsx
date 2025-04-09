@@ -105,7 +105,7 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   return (
     <Box
     id="stockinfoDiv"
-    sx={{ padding: 2, bgcolor: 'background.default', color: 'text.primary' }}
+    sx={{ padding: 2, bgcolor: 'background.paper', color: 'text.primary', border: '2px solid #404040', }}
 
     >
       <Typography variant="h4">{stockData.symbol} Stock Data</Typography>

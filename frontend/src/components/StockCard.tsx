@@ -63,7 +63,6 @@ const StockCard: React.FC<StockCardProps> = ({
     xaxis: {
       categories: categories,
       labels:{style:{colors: '#fff'}},
-      title: { text: 'Fiscal Date Ending', style: {color: '#fff',}},
 
     },
     yaxis: {
