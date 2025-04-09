@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/stock_list.dart';
@@ -19,16 +19,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Map<String, String>> stocks = [];
+  List<Map<String, String>> filteredStocks = [];
   bool loading = true;
   String? error;
   String? addError;
   String? name;
   late String userId;
+  String searchQuery = '';
 
   int currentPage = 0;
   final int itemsPerPage = 4;
 
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -36,11 +39,25 @@ class _HomePageState extends State<HomePage> {
     initUserAndFetchStocks();
   }
 
-  void goToFavorites() {
-    Navigator.push(
+  Future<void> goToFavorites() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const FavoritesPage()),
     );
+    if (result == true) {
+      await fetchStocksAndFavorites();
+    }
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_data');
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   void goToStockInfoPage(String symbol) {
@@ -81,6 +98,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<String> fetchStockName(String symbol) async {
+    try {
+      final nameResponse = await http.get(Uri.parse(
+          'http://134.122.3.46:3000/api/stockInfo?ticker=$symbol'));
+      if (nameResponse.statusCode == 200) {
+        final info = jsonDecode(nameResponse.body);
+        return info['short name']?.toString() ?? '';
+      }
+    } catch (_) {}
+    return '';
+  }
+
   Future<void> fetchStocksAndFavorites() async {
     try {
       final stocksResponse =
@@ -105,16 +134,23 @@ class _HomePageState extends State<HomePage> {
         );
       }
 
-      final filtered = stocksData
-          .where((s) => !favoriteSymbols.contains(s['symbol']))
-          .map((s) => {
-        'symbol': s['symbol'].toString(),
-        'name': s['name']?.toString() ?? '',
-      })
-          .toList();
+      final List<Map<String, String>> temp = [];
+      for (var stock in stocksData) {
+        if (!favoriteSymbols.contains(stock['symbol'])) {
+          String symbol = stock['symbol'].toString();
+          String displayName = stock['name']?.toString() ?? '';
+
+          if (displayName.isEmpty) {
+            displayName = await fetchStockName(symbol);
+          }
+
+          temp.add({'symbol': symbol, 'name': displayName});
+        }
+      }
 
       setState(() {
-        stocks = filtered;
+        stocks = temp;
+        filteredStocks = temp;
         loading = false;
       });
     } catch (e) {
@@ -123,6 +159,53 @@ class _HomePageState extends State<HomePage> {
         loading = false;
       });
     }
+  }
+
+  Future<void> addStockFromSearch() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://134.122.3.46:3000/api/stocks/${searchQuery.trim()}'),
+      );
+
+      if (response.statusCode == 200) {
+        final nameResponse = await http.get(
+          Uri.parse('http://134.122.3.46:3000/api/stockInfo?ticker=${searchQuery.trim()}'),
+        );
+        final nameData = jsonDecode(nameResponse.body);
+        final shortName = nameData['short name'] ?? '';
+
+        final Map<String, String> newStock = {
+          'symbol': searchQuery.trim().toUpperCase(),
+          'name': shortName,
+        };
+
+        setState(() {
+          stocks.add(newStock);
+          filterStocks(searchQuery); // Refresh display
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Stock not found or API limit reached.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding stock.')),
+      );
+    }
+  }
+
+  void filterStocks(String query) {
+    final lowerQuery = query.toLowerCase();
+    setState(() {
+      searchQuery = query;
+      currentPage = 0;
+      filteredStocks = stocks.where((stock) {
+        final symbol = stock['symbol']?.toLowerCase() ?? '';
+        final name = stock['name']?.toLowerCase() ?? '';
+        return symbol.contains(lowerQuery) || name.contains(lowerQuery);
+      }).toList();
+    });
   }
 
   Future<void> addFavorite(Map<String, String> stock) async {
@@ -135,6 +218,7 @@ class _HomePageState extends State<HomePage> {
     if (success) {
       setState(() {
         stocks.removeWhere((s) => s['symbol'] == stock['symbol']);
+        filteredStocks.removeWhere((s) => s['symbol'] == stock['symbol']);
       });
     } else {
       setState(() {
@@ -172,9 +256,11 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    final totalPages = (stocks.length / itemsPerPage).ceil();
-    final currentStocks =
-    stocks.skip(currentPage * itemsPerPage).take(itemsPerPage).toList();
+    final totalPages = (filteredStocks.length / itemsPerPage).ceil();
+    final currentStocks = filteredStocks
+        .skip(currentPage * itemsPerPage)
+        .take(itemsPerPage)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -185,12 +271,43 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.star),
             tooltip: 'Favorites',
           ),
+          IconButton(
+            onPressed: logout,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
+            TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white), // White text color
+              decoration: InputDecoration(
+                hintText: 'Search for a stock symbol or name...',
+                hintStyle: const TextStyle(color: Colors.white60), // Light white hint text
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  onPressed: addStockFromSearch,
+                ),
+                filled: true,
+                fillColor: Colors.black, // Dark background color for input field
+                border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white38),
+                ),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white38),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+              ),
+              onChanged: filterStocks,
+            ),
+            const SizedBox(height: 12),
             if (addError != null)
               Text(addError!, style: const TextStyle(color: Colors.red)),
             Expanded(
@@ -204,12 +321,13 @@ class _HomePageState extends State<HomePage> {
                     symbol: stock['symbol']!,
                     name: stock['name'],
                     onAddFavorite: () => addFavorite(stock),
-                    onSymbolClick: () => goToStockInfoPage(stock['symbol']!),
+                    onSymbolClick: () =>
+                        goToStockInfoPage(stock['symbol']!),
                   );
                 },
               )
                   : const Center(
-                child: Text("No favorites to add."),
+                child: Text("No stocks match your search."),
               ),
             ),
             if (totalPages > 1)

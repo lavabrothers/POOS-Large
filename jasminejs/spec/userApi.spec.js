@@ -170,7 +170,7 @@ describe('Testing Login API: ', function () {
         var { res, status } = await requestLogin(js)
         expect(res.message).toBe('Login successful')
         expect(res.error).toBeNull
-        expect(res.user._id).toBe("67ec9ea0b4d17f170bd40839")
+        expect(res.user._id).toBe("67f45f9a2e06a650c83d00b4")
         expect(res.user.username).toBe("UnitTester")
         expect(res.user.email).toBe("UnitTester@test.com")
         expect(res.user.firstName).toBe("Unit")

@@ -23,11 +23,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> doSignup() async {
     final obj = {
-      'username': _username.text,
-      'email': _email.text,
-      'password': _password.text,
-      'firstName': _firstName.text,
-      'lastName': _lastName.text,
+      'username': _username.text.trim(),
+      'email': _email.text.trim(),
+      'password': _password.text.trim(),
+      'firstName': _firstName.text.trim(),
+      'lastName': _lastName.text.trim(),
     };
 
     try {
@@ -54,6 +54,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  void goToLogin() {
+    Navigator.pushReplacementNamed(context, '/');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,43 +72,100 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-
                   const SizedBox(height: 20),
                   TextFormField(
-                    style: const TextStyle(color: Colors.white),
                     controller: _username,
-                    decoration: const InputDecoration(labelText: 'Username'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Username',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white38),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    style: const TextStyle(color: Colors.white),
                     controller: _email,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white38),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    style: const TextStyle(color: Colors.white),
                     controller: _password,
-                    decoration: const InputDecoration(labelText: 'Password'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white38),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                     obscureText: true,
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    style: const TextStyle(color: Colors.white),
                     controller: _firstName,
-                    decoration: const InputDecoration(labelText: 'First Name'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'First Name',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white38),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    style: const TextStyle(color: Colors.white),
                     controller: _lastName,
-                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Last Name',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white38),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: doSignup,
-                    child: const Text('Sign Up'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: goToLogin,
+                          child: const Text('Go Back'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: doSignup,
+                          child: const Text('Sign Up'),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   if (_message.isNotEmpty)
