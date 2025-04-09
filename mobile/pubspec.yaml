@@ -33,6 +33,7 @@ dependencies:
   http: ^0.13.6
   shared_preferences: ^2.2.2
   fl_chart: ^0.70.0
+  flutter_svg: ^2.0.7
   lottie: ^2.6.0
   intl: ^0.18.1
   # The following adds the Cupertino Icons font to your application.
@@ -62,7 +63,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/graph_animation.json
-
+    - assets/images/icon.svg
+    - assets/logos/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

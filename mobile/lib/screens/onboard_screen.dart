@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../data/stock_list.dart';
 import '../services/alter_fav.dart';
-import 'home_page.dart';
+import '../screens/home_page.dart';
 
 class OnBoardScreen extends StatefulWidget {
   const OnBoardScreen({super.key});
@@ -18,7 +17,11 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
   String logo = 'question';
   String message = '';
   String name = '';
+  String selectedStock = '';
   final TextEditingController _controller = TextEditingController();
+
+  // This will store the stock list excluding the added favorites
+  List<Map<String, String>> availableStockList = List.from(stockList);
 
   @override
   void initState() {
@@ -46,7 +49,8 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
   void onStockInputChanged(String input) {
     String matchedSymbol = 'question';
 
-    for (var stock in stockList) {
+    // Use the stockList from the imported file to find the selected stock
+    for (var stock in availableStockList) {
       final label = '${stock['symbol']} (${stock['name']})';
       if (label == input) {
         matchedSymbol = stock['symbol']!;
@@ -56,22 +60,21 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
 
     setState(() {
       logo = matchedSymbol;
+      selectedStock = input; // Set the selected stock here
     });
   }
 
   Future<void> addFavorite() async {
-    final input = _controller.text;
-
-    if (input.isEmpty) {
+    if (selectedStock.isEmpty) {
       setState(() => message = 'Select an option from the menu to add.');
       return;
     }
 
     String symbol = '';
     String companyName = '';
-    for (var stock in stockList) {
+    for (var stock in availableStockList) {
       final label = '${stock['symbol']} (${stock['name']})';
-      if (label == input) {
+      if (label == selectedStock) {
         symbol = stock['symbol']!;
         companyName = stock['name']!;
         break;
@@ -81,14 +84,24 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
     if (symbol.isEmpty) {
       setState(() => message = 'Invalid stock selection.');
     } else {
-      final success = await alterFav('a', user['_id'], symbol);
-      setState(() {
-        message = success
-            ? 'Added $companyName to your favorites. Feel free to add more!'
-            : 'Failed to add.';
-        _controller.clear();
-        logo = 'question';
-      });
+      final success = await alterFav('a', user['_id'], symbol); // Calls alterFav function
+      if (success) {
+        setState(() {
+          // Successfully added to favorites
+          message = 'Added $companyName to your favorites. Feel free to add more!';
+          // Remove the selected stock from the list
+          availableStockList.removeWhere((stock) =>
+          '${stock['symbol']} (${stock['name']})' == selectedStock);
+          // Reset the input field and logo
+          _controller.clear();
+          logo = 'question';
+          selectedStock = ''; // Reset the selected stock
+        });
+      } else {
+        setState(() {
+          message = 'Failed to add.';
+        });
+      }
     }
   }
 
@@ -97,13 +110,14 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
     setState(() {
       logo = 'question';
       message = '';
+      selectedStock = ''; // Reset the selected stock
     });
   }
 
   void goToHome() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
+      MaterialPageRoute(builder: (_) => const HomePage()), // Ensure HomePage is imported and defined
     );
   }
 
@@ -120,27 +134,26 @@ class _OnBoardScreenState extends State<OnBoardScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text == '') return const Iterable<String>.empty();
-                return stockList
-                    .map((stock) => '${stock['symbol']} (${stock['name']})')
-                    .where((option) =>
-                    option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+            // Dropdown to select a stock
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Select a Stock'),
+              value: selectedStock.isEmpty ? null : selectedStock,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedStock = newValue!;
+                  onStockInputChanged(newValue);
+                });
               },
-              onSelected: (selection) {
-                _controller.text = selection;
-                onStockInputChanged(selection);
-              },
-              fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                _controller.text = controller.text;
-                return TextField(
-                  controller: _controller,
-                  focusNode: focusNode,
-                  decoration: const InputDecoration(labelText: 'Search Stocks'),
-                  onChanged: onStockInputChanged,
+              items: availableStockList.map((stock) {
+                return DropdownMenuItem<String>(
+                  value: '${stock['symbol']} (${stock['name']})',
+                  child: Text(
+                    '${stock['symbol']} (${stock['name']})',
+                    style: const TextStyle(color: Colors.white), // Set text color to white
+                  ),
                 );
-              },
+              }).toList(),
+              dropdownColor: Colors.black, // Set dropdown background color to dark
             ),
             const SizedBox(height: 10),
             Row(

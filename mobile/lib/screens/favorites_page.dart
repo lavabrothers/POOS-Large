@@ -86,6 +86,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
       setState(() {
         favorites.removeWhere((s) => s['symbol'] == stock['symbol']);
       });
+
+      // Return true to signal HomePage to refresh its data
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to remove favorite: $e")),
@@ -95,13 +98,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   void goToStockInfo(String symbol) {
     Navigator.pushNamed(context, '/stocks/$symbol');
-  }
-
-  void goHome() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
-    );
   }
 
   void _changePage(int newPage) {
@@ -138,13 +134,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text('Hello Again, ${name.toUpperCase()}!',
-            //     style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            // ElevatedButton(
-            //   onPressed: goHome,
-            //   child: const Text('Home'),
-            // ),
             const SizedBox(height: 16),
             Expanded(
               child: currentFavorites.isNotEmpty

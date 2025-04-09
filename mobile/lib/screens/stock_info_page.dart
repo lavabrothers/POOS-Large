@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class StockInfoPage extends StatefulWidget {
   final String symbol;
@@ -15,6 +16,7 @@ class _StockInfoPageState extends State<StockInfoPage> {
   bool loading = true;
   String? error;
   Map<String, dynamic>? stockData;
+  String stockName = '';
 
   @override
   void initState() {
@@ -31,8 +33,21 @@ class _StockInfoPageState extends State<StockInfoPage> {
         throw Exception("Error: ${response.statusCode}");
       }
 
+      final decoded = jsonDecode(response.body);
+      String name = decoded['name'] ?? '';
+
+      if (name.isEmpty) {
+        final backup = await http.get(Uri.parse(
+            'http://134.122.3.46:3000/api/stockInfo?ticker=${widget.symbol}'));
+        if (backup.statusCode == 200) {
+          final backupData = jsonDecode(backup.body);
+          name = backupData['short name'] ?? '';
+        }
+      }
+
       setState(() {
-        stockData = jsonDecode(response.body);
+        stockData = decoded;
+        stockName = name;
         loading = false;
       });
     } catch (e) {
@@ -43,124 +58,241 @@ class _StockInfoPageState extends State<StockInfoPage> {
     }
   }
 
-  Widget buildChart({
-    required String title,
-    required List<dynamic> data,
-    required String xField,
-    required String yField,
-    required String yLabel,
-    required String xLabel,
-  }) {
-    final Map<String, List<double>> grouped = {};
+  Widget buildLineChart(String title, List<dynamic> data, String xField, String yField) {
+    final Map<int, double> yearToValue = {};
 
     for (var entry in data) {
       final rawDate = entry[xField];
-      final value = double.tryParse(entry[yField].toString()) ?? 0.0;
+      final year = int.tryParse(rawDate?.substring(0, 4) ?? '');
+      final value = double.tryParse(entry[yField]?.toString() ?? '0') ?? 0.0;
 
-      if (rawDate != null && rawDate is String && value != 0.0) {
-        final year = rawDate.substring(0, 4);
-        final yearInt = int.tryParse(year);
-        if (yearInt != null && yearInt >= DateTime.now().year - 4) {
-          grouped.putIfAbsent(year, () => []).add(value);
-        }
+      if (year != null && year >= 2020 && year <= 2024) {
+        yearToValue[year] = value;
       }
     }
 
-    final sortedYears = grouped.keys.toList()..sort();
-    final averages = sortedYears.map((year) {
-      final values = grouped[year]!;
-      return values.reduce((a, b) => a + b) / values.length;
-    }).toList();
+    final sortedYears = yearToValue.keys.toList()..sort();
+    final values = sortedYears.map((y) => yearToValue[y]!).toList();
 
-    final spots = averages.asMap().entries.map(
-          (e) => FlSpot(e.key.toDouble(), e.value),
-    ).toList();
+    if (values.isEmpty) return const SizedBox();
+    final minY = values.reduce((a, b) => a < b ? a : b);
+    final maxY = values.reduce((a, b) => a > b ? a : b);
 
-    if (sortedYears.isEmpty || spots.isEmpty) return const SizedBox();
-
-    final minY = averages.reduce((a, b) => a < b ? a : b);
-    final maxY = averages.reduce((a, b) => a > b ? a : b);
+    final yLabel = title.contains('Earnings')
+        ? 'EPS'
+        : title.contains('Income Statement')
+        ? 'Net Income'
+        : title.contains('Dividends')
+        ? 'Amount'
+        : 'Value';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 24),
-        Center(
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-          ),
-        ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 40),
-          child: SizedBox(
-            height: 300,
-            child: LineChart(
-              LineChartData(
-                minY: minY * 0.95,
-                maxY: maxY * 1.05,
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    axisNameWidget: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Text(yLabel),
-                    ),
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        if (value == 0 || value == (averages.length - 1)) {
-                          return Text((minY + (maxY - minY) * (value / (averages.length - 1))).toStringAsFixed(1));
-                        }
-                        return const Text('');
-                      },
-                      reservedSize: 40,
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    axisNameWidget: Padding(
-                      padding: const EdgeInsets.only(top: 24),
-                      child: Text(xLabel),
-                    ),
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index >= 0 && index < sortedYears.length) {
-                          return Text(sortedYears[index]);
-                        }
-                        return const Text('');
-                      },
-                      reservedSize: 40,
-                      interval: 1,
-                    ),
-                  ),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(
-                  show: true,
-                  border: const Border(
-                    left: BorderSide(color: Colors.black),
-                    bottom: BorderSide(color: Colors.black),
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        SizedBox(
+          height: 500,
+          child: LineChart(
+            LineChartData(
+              minY: minY,
+              maxY: maxY,
+              lineBarsData: [
+                LineChartBarData(
+                  spots: List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i])),
+                  isCurved: true,
+                  barWidth: 3,
+                  dotData: FlDotData(show: true),
+                  color: Colors.lightBlueAccent,
+                )
+              ],
+              titlesData: FlTitlesData(
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      return index >= 0 && index < sortedYears.length
+                          ? Text(sortedYears[index].toString(), style: const TextStyle(color: Colors.white))
+                          : const Text('');
+                    },
+                    reservedSize: 32,
                   ),
                 ),
-                gridData: FlGridData(show: true),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    barWidth: 2,
-                    dotData: FlDotData(show: true),
-                    belowBarData: BarAreaData(show: false),
-                    color: Colors.blue,
+                leftTitles: AxisTitles(
+                  axisNameWidget: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(yLabel, style: const TextStyle(color: Colors.white)),
                   ),
-                ],
+                  axisNameSize: 30,
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      if (value == minY || value == maxY) {
+                        final formatted = NumberFormat.compact().format(value);
+                        return Text(formatted, style: const TextStyle(color: Colors.white));
+                      }
+                      return const Text('');
+                    },
+                    reservedSize: 50,
+                  ),
+                ),
               ),
+              gridData: FlGridData(show: true),
+              borderData: FlBorderData(show: false),
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget buildBarChart(String title, List<dynamic> data, String xField, String yField) {
+    final Map<int, double> yearToValue = {};
+
+    for (var entry in data) {
+      final rawDate = entry[xField];
+      final year = int.tryParse(rawDate?.substring(0, 4) ?? '');
+      final value = double.tryParse(entry[yField]?.toString() ?? '0') ?? 0.0;
+
+      if (year != null && year >= 2020 && year <= 2024) {
+        yearToValue[year] = value;
+      }
+    }
+
+    final sortedYears = yearToValue.keys.toList()..sort();
+    final values = sortedYears.map((y) => yearToValue[y]!).toList();
+
+    if (values.isEmpty) return const SizedBox();
+    final minY = values.reduce((a, b) => a < b ? a : b);
+    final maxY = values.reduce((a, b) => a > b ? a : b);
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        SizedBox(
+          height: 500,
+          child: BarChart(
+            BarChartData(
+              maxY: maxY,
+              minY: minY,
+              barGroups: List.generate(values.length, (i) {
+                return BarChartGroupData(x: i, barRods: [
+                  BarChartRodData(toY: values[i], color: Colors.lightBlueAccent, width: 18)
+                ]);
+              }),
+              titlesData: FlTitlesData(
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      return index >= 0 && index < sortedYears.length
+                          ? Text(sortedYears[index].toString(), style: const TextStyle(color: Colors.white))
+                          : const Text('');
+                    },
+                    reservedSize: 32,
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  axisNameWidget: const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Text("Dividends", style: TextStyle(color: Colors.white)),
+                  ),
+                  axisNameSize: 30,
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      return value == minY || value == maxY
+                          ? Text(value.toStringAsFixed(1), style: const TextStyle(color: Colors.white))
+                          : const Text('');
+                    },
+                    reservedSize: 40,
+                  ),
+                ),
+              ),
+              gridData: FlGridData(show: true),
+              borderData: FlBorderData(show: false),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildPieChart(String title, Map<String, double> sections) {
+    final total = sections.values.fold(0.0, (a, b) => a + b);
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.cyan,
+      Colors.red,
+      Colors.grey
+    ];
+
+    final pieSections = sections.entries.toList().asMap().entries.map((entry) {
+      final index = entry.key;
+      final label = entry.value.key;
+      final value = entry.value.value;
+      final percentage = value / total * 100;
+      return PieChartSectionData(
+        value: value,
+        color: colors[index % colors.length],
+        title: '${percentage.toStringAsFixed(1)}%',
+        radius: 130,
+        titleStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+        showTitle: true,
+      );
+    }).toList();
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        SizedBox(
+          height: 480,
+          child: PieChart(
+            PieChartData(
+              sections: pieSections,
+              sectionsSpace: 2,
+              centerSpaceRadius: 50,
+              borderData: FlBorderData(show: false),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 24,
+          runSpacing: 10,
+          alignment: WrapAlignment.center,
+          children: sections.entries.toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final label = entry.value.key;
+            final color = colors[index % colors.length];
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 14, height: 14, color: color),
+                const SizedBox(width: 8),
+                Text(label, style: const TextStyle(color: Colors.white))
+              ],
+            );
+          }).toList(),
+        )
       ],
     );
   }
@@ -180,51 +312,55 @@ class _StockInfoPageState extends State<StockInfoPage> {
       );
     }
 
+    final balanceSheet = stockData!['balanceSheets'].isNotEmpty
+        ? stockData!['balanceSheets'][0]
+        : {};
+
+    final pieData = {
+      "Cash": double.tryParse(balanceSheet['cashAndShortTermInvestments']?.toString() ?? '0') ?? 0.0,
+      "Inventory": double.tryParse(balanceSheet['inventory']?.toString() ?? '0') ?? 0.0,
+      "PPE": double.tryParse(balanceSheet['propertyPlantEquipment']?.toString() ?? '0') ?? 0.0,
+      "Long-Term Investments": double.tryParse(balanceSheet['longTermInvestments']?.toString() ?? '0') ?? 0.0,
+      "Goodwill": double.tryParse(balanceSheet['goodwill']?.toString() ?? '0') ?? 0.0,
+      "Intangible": double.tryParse(balanceSheet['intangibleAssets']?.toString() ?? '0') ?? 0.0,
+    };
+
+    final totalUsed = pieData.values.fold(0.0, (a, b) => a + b);
+    final totalAssets = double.tryParse(balanceSheet['totalAssets']?.toString() ?? '0') ?? 0.0;
+    pieData['Other Assets'] = totalAssets - totalUsed;
+
     return Scaffold(
-      appBar: AppBar(title: Text("${widget.symbol} Stock Info")),
+      appBar: AppBar(
+        title: Text(
+          "${widget.symbol} - ${stockName.isNotEmpty ? stockName : 'Loading...'}",
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Column(
           children: [
-            buildChart(
-              title: "Earnings (Reported EPS)",
-              data: stockData!['earnings'],
-              xField: 'fiscalDateEnding',
-              yField: 'reportedEPS',
-              yLabel: 'EPS',
-              xLabel: 'Fiscal Date Ending',
+            buildLineChart(
+              "Earnings (Reported EPS)",
+              stockData!['earnings'],
+              'fiscalDateEnding',
+              'reportedEPS',
             ),
-            buildChart(
-              title: "Dividends",
-              data: stockData!['dividends'],
-              xField: 'ex_dividend_date',
-              yField: 'amount',
-              yLabel: 'Amount',
-              xLabel: 'Ex-Dividend Date',
+            buildBarChart(
+              "Dividends",
+              stockData!['dividends'],
+              'ex_dividend_date',
+              'amount',
             ),
-            buildChart(
-              title: "Income Statement (Net Income)",
-              data: stockData!['incomeStatements'],
-              xField: 'fiscalDateEnding',
-              yField: 'netIncome',
-              yLabel: 'Net Income',
-              xLabel: 'Fiscal Date Ending',
+            buildLineChart(
+              "Income Statement (Net Income)",
+              stockData!['incomeStatements'],
+              'fiscalDateEnding',
+              'netIncome',
             ),
-            buildChart(
-              title: "Balance Sheet (Total Assets)",
-              data: stockData!['balanceSheets'],
-              xField: 'fiscalDateEnding',
-              yField: 'totalAssets',
-              yLabel: 'Total Assets',
-              xLabel: 'Fiscal Date Ending',
-            ),
-            buildChart(
-              title: "Cash Flow (Net Income)",
-              data: stockData!['cashFlows'],
-              xField: 'fiscalDateEnding',
-              yField: 'netIncome',
-              yLabel: 'Net Income',
-              xLabel: 'Fiscal Date Ending',
+            buildPieChart(
+              "Balance Sheet Breakdown (Total Assets)",
+              pieData,
             ),
           ],
         ),

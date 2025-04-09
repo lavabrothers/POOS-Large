@@ -27,11 +27,27 @@ class _StockCardState extends State<StockCard> {
   bool loading = true;
   String? error;
   List<Earnings> earnings = [];
+  String? _name;
 
   @override
   void initState() {
     super.initState();
+    _name = widget.name;
     fetchEarnings();
+  }
+
+  @override
+  void didUpdateWidget(covariant StockCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.symbol != widget.symbol) {
+      setState(() {
+        loading = true;
+        error = null;
+        earnings = [];
+        _name = widget.name;
+      });
+      fetchEarnings();
+    }
   }
 
   Future<void> fetchEarnings() async {
@@ -44,11 +60,24 @@ class _StockCardState extends State<StockCard> {
       }
 
       final data = jsonDecode(response.body);
+
+      String shortName = _name ?? '';
+      if (shortName.isEmpty) {
+        final infoRes = await http.get(Uri.parse(
+            'http://134.122.3.46:3000/api/stockInfo?ticker=${widget.symbol}'));
+        if (infoRes.statusCode == 200) {
+          final infoData = jsonDecode(infoRes.body);
+          shortName = infoData['short name'] ?? '';
+        }
+      }
+
       setState(() {
         earnings = List<Earnings>.from(
           data['earnings'].map((e) => Earnings.fromJson(e)),
         );
-        earnings.sort((a, b) => a.fiscalDateEnding.compareTo(b.fiscalDateEnding));
+        earnings.sort((a, b) =>
+            a.fiscalDateEnding.compareTo(b.fiscalDateEnding));
+        _name = shortName;
         loading = false;
       });
     } catch (e) {
@@ -59,18 +88,6 @@ class _StockCardState extends State<StockCard> {
     }
   }
 
-  Map<String, List<double>> _aggregateEarningsByYear() {
-    final Map<String, List<double>> data = {};
-    for (var e in earnings) {
-      final year = e.fiscalDateEnding.substring(0, 4);
-      final eps = double.tryParse(e.reportedEPS);
-      if (eps != null) {
-        data.putIfAbsent(year, () => []).add(eps);
-      }
-    }
-    return data;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -79,7 +96,7 @@ class _StockCardState extends State<StockCard> {
         children: [
           StockCardInner(
             symbol: widget.symbol,
-            name: widget.name,
+            name: _name,
             earnings: earnings,
             loading: loading,
             error: error,
@@ -139,17 +156,27 @@ class StockCardInner extends StatelessWidget {
             const SizedBox(height: 8),
             Center(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/stocks/$symbol');
-                },
-                child: Text(
-                  "$symbol${name != null ? ' - $name' : ''}",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                    color: Colors.blue,
-                  ),
+                onTap: onSymbolClick,
+                child: Column(
+                  children: [
+                    Text(
+                      symbol,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    if (name != null && name!.trim().isNotEmpty)
+                      Text(
+                        name!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
                 ),
               ),
             ),
