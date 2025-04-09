@@ -69,8 +69,8 @@ interface BalanceSheetChartProps {
     }}
     series={balanceSheetValues}
     type="pie"
-    width={500}
-    height={300}
+    minwidth="100%"
+    minheight="100%"
     />
     </>
      );

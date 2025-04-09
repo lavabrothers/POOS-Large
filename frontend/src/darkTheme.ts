@@ -11,7 +11,7 @@ import { createTheme } from '@mui/material/styles';
      },
      background: {
        default: '#121212',
-       paper: '#1C1C1C',
+       paper: '#202020',
      },
      text: {
        primary: '#ffffff',

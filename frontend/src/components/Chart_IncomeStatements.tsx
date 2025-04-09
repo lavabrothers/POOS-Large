@@ -36,8 +36,8 @@ function Chart_IncomeStatement({ dates, values }: IncomeStatementChartProps): JS
             }}
             series={[{ name: 'Net Income', data: values }]}
             type="line"
-            width={500}
-            height={300}
+           minwidth="100%"
+           minheight="100%"
           />
   </>
   );
