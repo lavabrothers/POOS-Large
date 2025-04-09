@@ -159,9 +159,32 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
 
 
     >
-      <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
+      <Box
+        display="flex"
+        flexDirection="row" 
+        justifyContent="center"
+        alignItems={"center"}
+        position={"relative"}>
+        <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
+          <Box sx={{ ml: 2,
+            position: 'absolute',
+            top: "50%",
+            right: 0,
+            m:1,
+            transform: 'translateY(-50%)',
+           }}>
+                  <img
+                    src={`../logos/${stockData.symbol}.jpg`}
+                    alt="Logo"
+                    width="64"
+                    height="64"
+                  />
+          </Box>
+      </Box>
+      
+      
 
-      <Link href={stockDescription?.website} variant="h6">{stockDescription?.['company name']}</Link>
+      <Link href={stockDescription?.website} target="_blank" variant="h6">{stockDescription?.['company name']}</Link>
       <Typography variant="body1">{stockDescription?.description}</Typography>  
 
 {/*-----------------Top Row: Balance Sheet and Earnings----------------------*/}
