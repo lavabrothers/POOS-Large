@@ -49,10 +49,6 @@ function Home() {
     else setNewStockStatus(response.status)
   }
 
-  function signOut() : void {
-    localStorage.setItem('user_data', '')
-    window.location.href = '/'
-  }
 
   // Fetch all stocks and the user's favorites, then filter out favorites from the list
   useEffect(() => {
@@ -154,9 +150,6 @@ function Home() {
     >
 
       <Typography variant="h4">Welcome Home, {name}!</Typography>
-      <Button onClick={signOut} variant="contained"  sx={{ my: 2 }}>
-        Sign Out
-      </Button>
       
       {addError && <Typography color="error">{addError}</Typography>}
 
