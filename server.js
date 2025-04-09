@@ -631,8 +631,9 @@ app.get('/api/newsticker', async (req, res) => {
     const cacheEntry = await NewsTickerCache.findOne({});
     const now = new Date();
     const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const thirtyminutes = 1800000;
 
-    if (cacheEntry && (now - cacheEntry.updatedAt < twentyFourHours)) {
+    if (cacheEntry && (now - cacheEntry.updatedAt < thirtyminutes)) {
       console.log('Returning cached news ticker data');
       return res.json({ status: "ok", articles: cacheEntry.articles });
     }

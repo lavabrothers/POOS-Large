@@ -41,8 +41,8 @@ function Chart_Earnings({ dates, values }: EarningsChartProps): JSX.Element {
             }}
             series={[{ name: 'Reported EPS', data: values }]}
             type="line"
-            width={1000}
-            height={300}
+            minwidth={1000}
+            minheight={300}
           />
     </>
   );
