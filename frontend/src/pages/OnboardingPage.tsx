@@ -6,7 +6,6 @@ const LoginPage = () =>
 
     return(
       <div>
-        <PageTitle />
         <Onboarding />
       </div>
     );
