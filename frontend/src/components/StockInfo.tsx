@@ -73,10 +73,13 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   
   const [stockDescription, setStockDescription] = useState<stockDataDescription | null>(null);
   //const stockLogo = `logos/${stockSymbol}.jpg`;
-  const [setLoadingDesc] = useState(true);
+  const [loadingDesc, setLoadingDesc] = useState(true);
 
   useEffect(() => {
     if (!stockSymbol) return;
+    if(loadingDesc){
+       
+    }
     setLoading(true);
     setError(null);
     fetch(`http://134.122.3.46:3000/api/stocks/${stockSymbol}`)

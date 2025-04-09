@@ -2,7 +2,7 @@ import Typography from '@mui/material/Typography';
 import Box from "@mui/material/Box";
 import Lottie from 'lottie-react';
 import graphAnimation from '../assets/graph_animation.json';
-import { useLocation } from 'react-router-dom';
+//import { useLocation } from 'react-router-dom';
 import { Button } from '@mui/material';
 
 function goToHomePage(): void {
