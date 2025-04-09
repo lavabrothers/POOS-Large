@@ -33,6 +33,22 @@ interface stockDataDescription {
   'tag 3': string;
 }
 
+function StockLogo({ symbol }: { symbol: string }) {
+  const [imgSrc, setImgSrc] = useState(`../logos/${symbol}.jpg`);
+
+  const handleImageError = () => {
+    setImgSrc(`../images/logos/${symbol}.png`);
+  };
+  return (
+    <img
+      src={imgSrc}
+      alt={`${symbol} Logo`}
+      width="64"
+      height="64"
+      onError={handleImageError}
+    />
+  );
+}
 
 function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   // Retrieve user data
@@ -173,12 +189,7 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
             m:1,
             transform: 'translateY(-50%)',
            }}>
-                  <img
-                    src={`../logos/${stockData.symbol}.jpg`}
-                    alt="Logo"
-                    width="64"
-                    height="64"
-                  />
+            <StockLogo symbol={stockData.symbol} />
           </Box>
       </Box>
       
