@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Grid,} from '@mui/material';
+import { Box, Typography, Grid, Link,} from '@mui/material';
 import Chart_Earnings from './Chart_Earnings';
 import Chart_BalanceSheet, { BalanceSheetEntry } from './Chart_BalanceSheet';
 import Chart_Dividends from './Chart_Dividends';
@@ -16,6 +16,23 @@ interface StockData {
   cashFlows: Array<{ fiscalDateEnding: string; netIncome: number }>;
   earnings: Array<{ fiscalDateEnding: string; reportedEPS: string }>;
 }
+interface stockDataDescription {
+  ticker: string;
+  'company name': string;
+  'short name': string;
+  industry: string;
+  description: string;
+  website: string;
+  logo: string;
+  ceo: string;
+  exchange: string;
+  'market cap': number;
+  sector: string;
+  'tag 1': string;
+  'tag 2': string;
+  'tag 3': string;
+}
+
 
 function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   // Retrieve user data
@@ -37,6 +54,11 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  
+  const [stockDescription, setStockDescription] = useState<stockDataDescription | null>(null);
+  const stockLogo = `logos/${stockSymbol}.jpg`;
+  const [loadingDesc, setLoadingDesc] = useState(true);
+
   useEffect(() => {
     if (!stockSymbol) return;
     setLoading(true);
@@ -57,6 +79,23 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
         setError(err.message);
         setLoading(false);
       });
+      fetch(`http://134.122.3.46:3000/api/stockInfo/?ticker=${stockSymbol}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        setStockDescription(data);
+        setLoadingDesc(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+        setLoadingDesc(false);
+      });
+    
   }, [stockSymbol]);
 
   if (loading) return <p>Loading...</p>;
@@ -102,6 +141,10 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
   const operatingCFValues = sortedCashFlows.map(item => parseValue2((item as any).operatingCashflow));
   const financingCFValues = sortedCashFlows.map(item => parseValue2((item as any).cashflowFromFinancing));
 
+  // Stock description and logo
+
+
+
   return (
     <Box
     id="stockinfoDiv"
@@ -109,6 +152,10 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
 
     >
       <Typography variant="h4">{stockData.symbol} Stock Data</Typography>
+
+      <Link href={stockDescription?.website} variant="h6">{stockDescription?.['company name']}</Link>
+      <Typography variant="body1">{stockDescription?.description}</Typography>  
+
 {/*-----------------Top Row: Balance Sheet and Earnings----------------------*/}
       {/* Balance Sheet  */}
       <Grid container spacing={2} sx={{ mt: 10 }}>
@@ -120,7 +167,7 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Chart_Earnings dates={earningsDates} values={earningsValues} />
         </Grid>
-      </Grid>
+      </Grid><br/><br/>
 
 {/*----------------Bottom Row: Dividends, Income Statement, and Cash Flow---------------*/}
       <Grid container spacing={2} sx={{ mt: 2 }}>
