@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Lottie from 'lottie-react';
 import graphAnimation from '../assets/graph_animation.json';
 import { useLocation } from 'react-router-dom';
+import { Button } from '@mui/material';
 
 function goToHomePage(): void {
   window.location.href = '/home';
@@ -10,6 +11,11 @@ function goToHomePage(): void {
 
 function goToFavorites(): void {
   window.location.href = '/favorites';
+}
+
+function signOut() : void {
+  localStorage.setItem('user_data', '')
+  window.location.href = '/'
 }
 
 function Logo() {
@@ -29,16 +35,14 @@ function Logo() {
             Finstats
           </Typography>
         </Box>
-        <Typography onClick={goToFavorites} 
-        variant="h3" 
-        sx={{
-             cursor: 'pointer', 
-             mt: 3.5, mr: 1,  
-             color: location.pathname === '/favorites' ? 'primary.main' : 'inherit'
-            }}
-        >
-            Favorites
-        </Typography>
+        <Box>
+          <Button onClick={goToFavorites} variant="contained"  sx={{ my: 2, mx: 2}}>
+          Favorites 
+          </Button>
+          <Button onClick={signOut} variant="contained"  color="secondary" sx={{ my: 2 }}>
+            Sign Out
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
