@@ -72,8 +72,8 @@ function StockInfo({ stockSymbol }: { stockSymbol: string }) {
 
   
   const [stockDescription, setStockDescription] = useState<stockDataDescription | null>(null);
-  const stockLogo = `logos/${stockSymbol}.jpg`;
-  const [loadingDesc, setLoadingDesc] = useState(true);
+  //const stockLogo = `logos/${stockSymbol}.jpg`;
+  const [setLoadingDesc] = useState(true);
 
   useEffect(() => {
     if (!stockSymbol) return;

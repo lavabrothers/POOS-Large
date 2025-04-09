@@ -19,7 +19,7 @@ function signOut() : void {
 }
 
 function Logo() {
-  const location = useLocation();
+  //const location = useLocation();
   
   return (
     <Box sx={{ width: '95%', padding: 2 }}>
